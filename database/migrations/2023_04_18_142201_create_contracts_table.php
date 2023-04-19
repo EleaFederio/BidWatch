@@ -16,12 +16,13 @@ return new class extends Migration
             $table->string('contract_id');
             $table->string('title');
             $table->longText('description')->nullable();
-            $table->string('location');
+            $table->string('location')->nullable();
             $table->decimal('approved_budget', 15, 2);
             $table->dateTime('pre_bid')->nullable();
             $table->dateTime('opening_of_bids');
             $table->date('bulletin_posting');
             $table->date('bulletin_removal');
+            $table->boolean('archieve')->default(false);
             $table->timestamps();
         });
     }

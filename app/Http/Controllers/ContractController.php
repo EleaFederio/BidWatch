@@ -7,6 +7,8 @@ use App\Http\Resources\ContractsResource;
 use App\Models\Contract;
 use Illuminate\Http\Request;
 
+use PDF;
+
 class ContractController extends Controller
 {
     /**
@@ -126,5 +128,13 @@ class ContractController extends Controller
             'success' => false,
             'message' => 'Contract Doesn\'t Exist!'
         ]);
+    }
+
+    public function createCertification(){
+        $contract = Contract::where('contract_id', '23FL0013')->first();
+        // return $contract;
+        // $pdf = PDF::loadView('pdf/posting_certification', $contract);
+        $pdf = PDF::loadView('pdf/posting_certification');
+        return $pdf->stream('pdf_file.pdf');
     }
 }

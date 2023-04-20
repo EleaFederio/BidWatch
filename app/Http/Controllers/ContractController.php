@@ -132,9 +132,9 @@ class ContractController extends Controller
 
     public function createCertification(){
         $contract = Contract::where('contract_id', '23FL0013')->first();
-        // return $contract;
-        // $pdf = PDF::loadView('pdf/posting_certification', $contract);
-        $pdf = PDF::loadView('pdf/posting_certification');
+        // return $contract->toArray();
+        $pdf = PDF::loadView('pdf/posting_certification', $contract->toArray());
+        // $pdf = PDF::loadView('pdf/posting_certification');
         return $pdf->stream('pdf_file.pdf');
     }
 }

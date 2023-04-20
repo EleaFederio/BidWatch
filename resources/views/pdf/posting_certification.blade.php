@@ -37,6 +37,12 @@
             margin-top: 80px;
             font-family: Tahoma, Verdana, sans-serif;
         }
+        .content-one{
+            margin-top: 40px;
+        }
+        .content-two{
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -63,6 +69,13 @@
     </table>
 
     <h1 class="text-center cert-title">CERTIFICATION</h1>
+
+    <p class="content-one">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is to certify that the INVITATION TO BID for the
+        {{ $title }} with <b>Contract ID: {{ $contract_id }}</b> was posted in three (3) conspicuous places/ Bulletin Boards
+     of this office from {{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $bulletin_posting.' 00:00:00')->format('F d, Y') }} to
+     {{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $bulletin_removal.' 00:00:00')->format('F d, Y') }}. </p>
+     <p class="content-two">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Issued this {{ \Carbon\Carbon::now()->format('l jS \\of F Y') }}
+        at DPWH Sorsogon 2nd District Engineering Office, Payawin, Gubat, Sorsogon. </p>
 
 </body>
 </html>

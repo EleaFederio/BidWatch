@@ -30,7 +30,7 @@
             font-family: Tahoma, Verdana, sans-serif;
         }
         .logo-cell{
-            width: 200px;
+            width: 110px;
             align-self: center;
         }
         .cert-title{
@@ -38,7 +38,7 @@
             font-family: Tahoma, Verdana, sans-serif;
         }
         .content-one{
-            margin-top: 40px;
+            margin-top: 80px;
         }
         .content-two{
             margin-top: 20px;
@@ -51,11 +51,11 @@
 </head>
 <body>
 
-    <table>
+    <table style="margin-left: 30px;">
       <tr>
         <td class="logo-cell">
             <div class="text-center">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Department_of_Public_Works_and_Highways_%28DPWH%29.svg/240px-Department_of_Public_Works_and_Highways_%28DPWH%29.svg.png" width="100" />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Department_of_Public_Works_and_Highways_%28DPWH%29.svg/240px-Department_of_Public_Works_and_Highways_%28DPWH%29.svg.png" width="90" />
             </div>
         </td>
         <td>
@@ -79,18 +79,19 @@
      of this office from {{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $bulletin_posting.' 00:00:00')->format('F d, Y') }} to
      {{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $bulletin_removal.' 00:00:00')->format('F d, Y') }}. </p>
      <p class="content content-two">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Issued this {{ \Carbon\Carbon::now()->format('l jS \\of F Y') }}
-        at DPWH Sorsogon 2nd District Engineering Office, Payawin, Gubat, Sorsogon. </p>
+        at the DPWH Sorsogon 2nd District Engineering Office, Payawin, Gubat, Sorsogon. </p>
 
-    <table style="margin-top: 50px">
+    <table style="margin-top: 100px">
         <tr>
-            <td style="width: 250;">
+            <td style="width: 280;">
                 <!-- <h1>Hello</h1> -->
             </td>
             <td style="width: 200;">
                 <div class="text-center">
+                    <!-- This should be base from the fetch data from API -->
                     <hr style="margin-bottom: 0px;"/>
                     <p style="margin-top:0px; font-size: 12"><b>LEVI D. PURA Jr.</b></p>
-                    <p>PIO Designate</p>
+                    <p style="color: #333"><small>PIO Designate</small></p>
                 </div>
             </td>
         </tr>

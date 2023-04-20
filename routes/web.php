@@ -18,7 +18,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
+// Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::get('/contract/certification', [ContractController::class, 'createCertification']);
+Route::get('/contract/certification/{contractID}', [ContractController::class, 'createCertification']);

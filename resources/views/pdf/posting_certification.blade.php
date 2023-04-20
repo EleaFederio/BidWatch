@@ -58,7 +58,7 @@
             <!-- Header -->
             <div class="text-center">
                 <p><small>Republic of the Philippines</small></p>
-                <p>DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS</p>
+                <p style="font-size: 13;">DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS</p>
                 <p><b>SORSOGON SECOND</b></p>
                 <p><b>DISTRICT ENGINEERING OFFICE</b></p>
                 <p><small>REGIONAL OFFICE V</small></p>
@@ -76,6 +76,21 @@
      {{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $bulletin_removal.' 00:00:00')->format('F d, Y') }}. </p>
      <p class="content-two">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Issued this {{ \Carbon\Carbon::now()->format('l jS \\of F Y') }}
         at DPWH Sorsogon 2nd District Engineering Office, Payawin, Gubat, Sorsogon. </p>
+
+    <table style="margin-top: 50px">
+        <tr>
+            <td style="width: 250;">
+                <!-- <h1>Hello</h1> -->
+            </td>
+            <td style="width: 200;">
+                <div class="text-center">
+                    <hr style="margin-bottom: 0px;"/>
+                    <p style="margin-top:0px; font-size: 12"><b>LEVI D. PURA Jr.</b></p>
+                    <p>PIO Designate</p>
+                </div>
+            </td>
+        </tr>
+    </table>
 
 </body>
 </html>

@@ -7,6 +7,10 @@ use App\Http\Resources\ContractsResource;
 use App\Models\Contract;
 use Illuminate\Http\Request;
 
+use \PDF;
+
+use function PHPUnit\Framework\isEmpty;
+
 class ContractController extends Controller
 {
     /**
@@ -126,5 +130,19 @@ class ContractController extends Controller
             'success' => false,
             'message' => 'Contract Doesn\'t Exist!'
         ]);
+    }
+
+    public function createCertification($contractID){
+        $contract = Contract::where('contract_id', $contractID)->first();
+        if($contract == ''){
+            return response()->json([
+                'success' => false,
+                'message' => 'Contract Doesn\'t Exist!'
+            ]);
+        }
+        $pdf = PDF::loadView('pdf/posting_certification', $contract->toArray());
+        $pdf->setPaper('A4', 'portrait');
+        $pdf->setOption('margin: 50em 500em 300em 1em;');
+        return $pdf->stream('pdf_file.pdf');
     }
 }

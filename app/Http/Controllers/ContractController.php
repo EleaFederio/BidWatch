@@ -141,6 +141,8 @@ class ContractController extends Controller
             ]);
         }
         $pdf = PDF::loadView('pdf/posting_certification', $contract->toArray());
+        $pdf->setPaper('A4', 'portrait');
+        $pdf->setOption('margin: 50em 500em 300em 1em;');
         return $pdf->stream('pdf_file.pdf');
     }
 }

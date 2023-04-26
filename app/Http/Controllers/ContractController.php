@@ -21,7 +21,7 @@ class ContractController extends Controller
     {
         $contracts = Contract::all();
         // return $contracts;
-        return ContractsResource::collection(Contract::paginate());
+        return ContractsResource::collection(Contract::paginate(6));
     }
 
     /**

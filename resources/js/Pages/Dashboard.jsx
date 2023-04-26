@@ -6,10 +6,11 @@ import DateObject from 'react-date-object';
 
 export default function Dashboard({ auth }) {
 
-    const [contracts, setContracts] = useState([]);
+    const [contracts, setContracts] = useState();
+    const [apiUrl, setApiUrl] = useState('');
 
     const getContracts = () => {
-        axios.get('http://127.0.0.1:8000/api/contracts')
+        axios.get('http://oxufa.localtonet.com/api/contracts')
             .then(res => {
                 setContracts(res.data.data)
                 // setContracts(res.data);
@@ -30,12 +31,16 @@ export default function Dashboard({ auth }) {
         >
             <Head title="Dashboard" />
 
-            <div className="container mx-auto mt-8 grid grid-cols-3 gap-2">
+            <div className="container mx-auto mt-8 grid grid-cols-3 gap-8">
 
                 {
 
                     !contracts ?
-                    <h1>Loading...</h1>
+                    (
+                        <div>
+                            <div class="px-7 py-1 text-lg font-medium leading-none text-center text-blue-800 bg-blue-200 rounded-full animate-pulse dark:bg-blue-900 dark:text-blue-200">loading...</div>
+                        </div>
+                    )
                     :
                     // console.log(contracts.data)
                     contracts.map((contract) => {
@@ -55,8 +60,22 @@ export default function Dashboard({ auth }) {
                     })
                 }
 
+            </div>
 
-
+            <div className='mx-auto'>
+                <nav aria-label="Page navigation example">
+                    <ul class="inline-flex -space-x-px">
+                        <li>
+                        <a href="#" class="px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
+                        </li>
+                        <li>
+                        <a href="#" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">5</a>
+                        </li>
+                        <li>
+                        <a href="#" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
 
 

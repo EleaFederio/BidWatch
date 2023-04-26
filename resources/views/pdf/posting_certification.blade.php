@@ -51,7 +51,7 @@
 </head>
 <body>
 
-    <table style="margin-left: 30px;">
+    <table style="margin-left: 30px; margin-top:40px">
       <tr>
         <td class="logo-cell">
             <div class="text-center">

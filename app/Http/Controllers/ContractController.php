@@ -6,7 +6,7 @@ use App\Http\Resources\ContractListResource;
 use App\Http\Resources\ContractsResource;
 use App\Models\Contract;
 use Illuminate\Http\Request;
-
+use Inertia\Inertia;
 use \PDF;
 
 use function PHPUnit\Framework\isEmpty;
@@ -16,6 +16,7 @@ class ContractController extends Controller
     /**
      * Display a listing of the resource.
      */
+
     public function index()
     {
         $contracts = Contract::all();

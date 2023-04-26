@@ -91,7 +91,7 @@
                     <!-- This should be base from the fetch data from API -->
                     <hr style="margin-bottom: 0px;"/>
                     <p style="margin-top:0px; font-size: 12"><b>LEVI D. PURA Jr.</b></p>
-                    <p style="color: #333"><small>PIO Designate</small></p>
+                    <p style="color: #333"><small>Administrative Officer IV/PIO Designate</small></p>
                 </div>
             </td>
         </tr>

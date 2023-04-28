@@ -52,7 +52,7 @@ export default function Dashboard({ auth }) {
                                 </a>
                                 <p className="mb-1 text-2xm font-bold text-gray-700 dark:text-gray-400">{contract.title}</p>
                                 {/* <h2 class=" text-lg font-bold text-gray-900 dark:text-white">BID Schedule</h2> */}
-                                <p><small>Pre-Bid Conference: <b>{new DateObject(contract.pre_bid_schedule).format("MMMM DD, YYYY @ hh:mm a")}</b></small></p>
+                                <p><small>Pre-Bid Conference: <b>{contract.pre_bid_schedule === null ? '---' : new DateObject(contract.pre_bid_schedule).format("MMMM DD, YYYY @ hh:mm a")}</b></small></p>
                                 <p><small>Opening of Bids: <b>{new DateObject(contract.opening_of_bids_schedule).format("MMMM DD, YYYY @ hh:mm a")}</b></small></p>
                                 <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">Posting: {contract.bulletinboard_posting} to {contract.bulletinboard_removal}</p>
                                 <a href={'http://127.0.0.1:8000/contract/certification/' + contract.contract_id} target='_blank' className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Certification</a>
@@ -92,7 +92,7 @@ export default function Dashboard({ auth }) {
                                             C15.952,9,16,9.447,16,10z" />
                 </svg>
             </label>
-            
+
             <input type="checkbox" id="my-modal" className="modal-toggle" />
             <div className="modal">
             <div className="modal-box">

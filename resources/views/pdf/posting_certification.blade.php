@@ -74,7 +74,7 @@
 
     <h1 class="text-center cert-title">CERTIFICATION</h1>
 
-    <p class="content content-one">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is to certify that the INVITATION TO BID for the
+    <p class="content content-one">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This is to certify that the <b>INVITATION TO BID</b> for the
         {{ $title }} with <b>Contract ID: {{ $contract_id }}</b> was posted in three (3) conspicuous places/ Bulletin Boards
      of this office from {{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $bulletin_posting.' 00:00:00')->format('F d, Y') }} to
      {{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $bulletin_removal.' 00:00:00')->format('F d, Y') }}. </p>

@@ -5,7 +5,11 @@
     "keywords": ["framework", "laravel"],
     "license": "MIT",
     "require": {
+<<<<<<< HEAD
         "php": "^7.3|^8.0",
+=======
+        "php": "^8.0",
+>>>>>>> b4964be8f19484e20d2c94dda7f44bb85469f9bd
         "barryvdh/laravel-dompdf": "^2.0",
         "guzzlehttp/guzzle": "^7.2",
         "inertiajs/inertia-laravel": "^0.6.3",

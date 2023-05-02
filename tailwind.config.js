@@ -7,6 +7,7 @@ module.exports = {
         './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
         './resources/js/**/*.jsx',
+        "./node_modules/flowbite/**/*.js"
     ],
 
     theme: {
@@ -14,9 +15,12 @@ module.exports = {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            extend: {},
         },
     },
 
-    plugins: [require('@tailwindcss/forms')],
-    plugins: [require("daisyui")],
+    plugins: [
+        require('@tailwindcss/forms'),
+        require('flowbite/plugin')
+    ],
 };

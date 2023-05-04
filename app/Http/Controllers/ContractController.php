@@ -6,6 +6,7 @@ use App\Http\Resources\ContractListResource;
 use App\Http\Resources\ContractsResource;
 use App\Models\Contract;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use \PDF;
 
@@ -19,9 +20,9 @@ class ContractController extends Controller
 
     public function index()
     {
-        $contracts = Contract::all();
+        $contracts = DB::table('contracts')->orderBy('id', 'DESC')->cursorPaginate(15);;
         // return $contracts;
-        return ContractsResource::collection(Contract::paginate(6));
+        return ContractsResource::collection($contracts);
     }
 
     /**

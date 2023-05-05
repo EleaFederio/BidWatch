@@ -9,6 +9,13 @@ export default function Dashboard({ auth }) {
 
     const [contracts, setContracts] = useState();
     const [apiUrl, setApiUrl] = useState('/api/contracts');
+    const [contractData, setContractData] = useState({
+        contract_id : "22FL0025",
+        contract_title : "",
+        contract_details : "",
+        contract_location : "",
+        contract_approved_budget : 0.00
+    })
     const [step, setStep] = useState(1);
     const [modalDisplay, setModalDisplay] = useState(false);
 
@@ -133,7 +140,7 @@ export default function Dashboard({ auth }) {
                     <form class="space-y-6" action="#">
                         <div>
                             <label for="contract_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Contract ID</label>
-                            <input type="contract_id" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="23FL0000" required />
+                            <input type="contract_id" name="email" id="email" value={contractData.contract_id} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="23FL0000" required />
                         </div>
                         <div className='mb-1'>
                             <label for="contract_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title</label>

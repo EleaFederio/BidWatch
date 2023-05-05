@@ -20,7 +20,7 @@ class ContractController extends Controller
 
     public function index()
     {
-        $contracts = DB::table('contracts')->orderBy('id', 'DESC')->cursorPaginate(15);;
+        $contracts = DB::table('contracts')->orderBy('id', 'DESC')->cursorPaginate(6);;
         // return $contracts;
         return ContractsResource::collection($contracts);
     }

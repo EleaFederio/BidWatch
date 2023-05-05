@@ -8,12 +8,12 @@ import DateObject from 'react-date-object';
 export default function Dashboard({ auth }) {
 
     const [contracts, setContracts] = useState();
-    const [apiUrl, setApiUrl] = useState('');
+    const [apiUrl, setApiUrl] = useState('/api/contracts');
     const [step, setStep] = useState(1);
     const [modalDisplay, setModalDisplay] = useState(false);
 
     const getContracts = () => {
-        axios.get('/api/contracts')
+        axios.get(apiUrl)
             .then(res => {
                 setContracts(res.data)
                 // setContracts(res.data);
@@ -25,7 +25,7 @@ export default function Dashboard({ auth }) {
 
     useEffect(() => {
         getContracts();
-    }, []);
+    }, [apiUrl]);
 
     return (
         <AuthenticatedLayout
@@ -67,23 +67,30 @@ export default function Dashboard({ auth }) {
 
             <div className='absolute bottom-5 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mx-auto'>
                 <nav aria-label="Page navigation example">
-                    
+
                         {
-                            !contracts ? '' : 
+                            !contracts ? '' :
                             (
-                                <ul className="inline-flex -space-x-px">
-                                    <li>
-                                        <a href={contracts.links.prev} className="px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</a>
-                                    </li>
-                                    <li>
-                                        <a href={contracts.links.next} className="px-6 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</a>
-                                    </li>
-                                </ul>
+                                <div>
+                                    <span class="text-sm text-gray-700 dark:text-gray-400">
+                                        Showing <span class="font-semibold text-gray-900 dark:text-white">{contracts.meta.from}</span> to <span class="font-semibold text-gray-900 dark:text-white">{contracts.meta.to}</span> of <span class="font-semibold text-gray-900 dark:text-white">{contracts.meta.total}</span> Entries
+                                    </span>
+                                    <div>
+                                        <ul className="inline-flex -space-x-px">
+                                            <li>
+                                                <button onClick={() => (setApiUrl(contracts.links.prev))} disabled={contracts.links.prev === null ? true : false} className="px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Previous</button>
+                                            </li>
+                                            <li>
+                                                <button onClick={() => (setApiUrl(contracts.links.next))} disabled={contracts.links.next === null ? true : false} className="px-6 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">Next</button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
                             )
                         }
-                        
-                        
-                    
+
+
+
                 </nav>
             </div>
 

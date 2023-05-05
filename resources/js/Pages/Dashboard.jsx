@@ -11,10 +11,15 @@ export default function Dashboard({ auth }) {
     const [apiUrl, setApiUrl] = useState('/api/contracts');
     const [contractData, setContractData] = useState({
         contract_id : "22FL0025",
-        contract_title : "",
-        contract_details : "",
-        contract_location : "",
-        contract_approved_budget : 0.00
+        title : "",
+        location : "",
+        details : "",
+        approved_budget : 0.00,
+        pre_bid : '2023-05-12 14:00:00',
+        opening_of_bids : '2023-05-30 10:30:00',
+        bulletin_posting : '2023-05-05',
+        bulletin_removal: '2023-05-11',
+        archieve : false
     })
     const [step, setStep] = useState(1);
     const [modalDisplay, setModalDisplay] = useState(false);
@@ -29,6 +34,15 @@ export default function Dashboard({ auth }) {
                 console.log(error)
             })
     }
+
+    const handleChange = e => {
+        const { name, value } = e.target;
+        setContractData(contractData => ({
+            ...contractData,
+            [name]: value
+        }));
+        console.log(contractData.contract_id)
+    };
 
     useEffect(() => {
         getContracts();
@@ -140,7 +154,7 @@ export default function Dashboard({ auth }) {
                     <form class="space-y-6" action="#">
                         <div>
                             <label for="contract_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Contract ID</label>
-                            <input type="contract_id" name="email" id="email" value={contractData.contract_id} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="23FL0000" required />
+                            <input type="contract_id" name="contract_id" id="email" value={contractData.contract_id} onChange={handleChange} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="23FL0000" required />
                         </div>
                         <div className='mb-1'>
                             <label for="contract_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title</label>

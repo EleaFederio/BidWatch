@@ -11,10 +11,10 @@ export default function Dashboard({ auth }) {
     const [apiUrl, setApiUrl] = useState('/api/contracts');
     const [contractData, setContractData] = useState({
         contract_id : "22FL0025",
-        title : "",
-        location : "",
-        details : "",
-        approved_budget : 0.00,
+        contract_title : "Hahaha",
+        contract_location : "",
+        contract_details : "",
+        contract_approved_budget : 0.00,
         pre_bid : '2023-05-12 14:00:00',
         opening_of_bids : '2023-05-30 10:30:00',
         bulletin_posting : '2023-05-05',
@@ -154,23 +154,23 @@ export default function Dashboard({ auth }) {
                     <form class="space-y-6" action="#">
                         <div>
                             <label for="contract_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Contract ID</label>
-                            <input type="contract_id" name="contract_id" id="email" value={contractData.contract_id} onChange={handleChange} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="23FL0000" required />
+                            <input type="text" name="contract_id" id="contract_id" value={contractData.contract_id} onChange={handleChange} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="23FL0000" required />
                         </div>
                         <div className='mb-1'>
                             <label for="contract_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title</label>
-                            <textarea id="contract_title" placeholder="Construction of Infra...." class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required />
-                        </div>
-                        <div className='mb-1'>
-                            <label for="contract_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Details</label>
-                            <textarea id="contract_title" placeholder="...." class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required />
+                            <textarea id="contract_title" name="contract_title" placeholder="Construction of Infra...." value={contractData.contract_title} onChange={handleChange} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required />
                         </div>
                         <div>
                             <label for="contract_location" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Location</label>
-                            <input type="contract_location" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Brgy. Balud Norte, Gubat, Sorsogon...." required />
+                            <input type="textarea" name="contract_location" id="contract_location" value={contractData.contract_location} onChange={handleChange} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Brgy. Balud Norte, Gubat, Sorsogon...." required />
+                        </div>
+                        <div className='mb-1'>
+                            <label for="contract_details" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Details</label>
+                            <textarea id="contract_details" name="contract_details" placeholder="...." value={contractData.contract_details} onChange={handleChange} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required />
                         </div>
                         <div>
                             <label for="contract_approved_budget" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Approved Budget</label>
-                            <input type="contract_approved_budget" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="P 99,000,000.00" required />
+                            <input type="number" name="contract_approved_budget" id="contract_approved_budget" value={contractData.contraccontract_approved_budgett_details} onChange={handleChange} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="P 99,000,000.00" required />
                         </div>
 
                         {/* <label className='mt-3'>Bulletinboard Posting Schedule</label>

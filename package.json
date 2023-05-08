@@ -23,6 +23,7 @@
         "vite": "^4.3.4"
     },
     "dependencies": {
+        "dayjs": "^1.11.7",
         "flowbite-datepicker": "^1.2.2",
         "react-bootstrap": "^2.7.4",
         "react-date-object": "^2.1.7"

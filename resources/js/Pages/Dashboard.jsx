@@ -2,6 +2,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Modal from '@/components/Modal';
 import Stepper from '@/components/contracts/Stepper';
 import StepperControl from '@/components/contracts/StepperControl';
+import ContractDetailsForm from '@/components/contracts/steps/ContractDetailsForm';
+import ContractScheduleForm from '@/components/contracts/steps/ContractScheduleForm';
 import { Head } from '@inertiajs/react';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -24,20 +26,13 @@ export default function Dashboard({ auth }) {
         archieve : false
     })
 
-    const [currentStep, setCurrentStep] = useState(1);
+    const [page, setPage] = useState(0);
 
-    const steps = [
-        "Contract Deatils",
-        "COntract Schedule",
+    const formTitles = [
+        "Contract Details",
+        "Contract Schedule",
         "Submit"
     ];
-
-    const displaySteps = (step) => {
-        switch(step){
-            case 1:
-                return <ContractDetailsForm />
-        }
-    }
 
     const [modalDisplay, setModalDisplay] = useState(false);
 
@@ -60,6 +55,15 @@ export default function Dashboard({ auth }) {
         }));
         console.log(contractData)
     };
+
+    const pageDisplay = () => {
+        switch(page){
+            case 0:
+                return <ContractDetailsForm contractData={contractData} handleChange={handleChange} />
+            case 1:
+                return <ContractScheduleForm />
+        }
+    }
 
     useEffect(() => {
         getContracts();
@@ -147,11 +151,15 @@ export default function Dashboard({ auth }) {
                     <span class="sr-only">Close modal</span>
                 </button>
                 <div class="px-6 py-6 lg:px-8">
-                    <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Add New Contract</h3>
-
-                    <Stepper steps={steps} currentStep={currentStep} />
-
-                    <StepperControl />
+                    <Stepper page={page} formTitles={formTitles} />
+                    <div>
+                        {pageDisplay()}
+                    </div>
+                    <StepperControl 
+                        page={page}
+                        formTitles={formTitles} 
+                        setPage={setPage} 
+                    />
                 </div>
             </div>
             </Modal>

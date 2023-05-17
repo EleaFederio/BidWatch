@@ -14,28 +14,29 @@ const displaySteps = (
     </>
 )
 
-const Stepper = ({steps, currentStep}) => {
+const Stepper = ({page, formTitles}) => {
 
-    const [newStep, setNewStep] = useState([]);
-    const stepRef = useRef();
+    // const [newStep, setNewStep] = useState([]);
+    // const stepRef = useRef();
 
-    useEffect(() => {
-        const stepState = steps.map((step, index) => Object.assign(
-            {},
-            {
-                description: step,
-                completed: false,
-                highlighted: index === 0 ? true : false,
-                selected: index === 0 ? true : false 
-            }
-        ))
-    }, steps, currentStep)
+    // useEffect(() => {
+    //     const stepState = steps.map((step, index) => Object.assign(
+    //         {},
+    //         {
+    //             description: step,
+    //             completed: false,
+    //             highlighted: index === 0 ? true : false,
+    //             selected: index === 0 ? true : false 
+    //         }
+    //     ))
+    // }, steps, currentStep)
 
     return (
         <>
-            <ol class="flex items-center w-full text-sm font-medium text-center text-gray-500 dark:text-gray-400 sm:text-base mb-5">
+            <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">{formTitles[page]}</h3>
+            {/* <ol className="flex items-center w-full text-sm font-medium text-center text-gray-500 dark:text-gray-400 sm:text-base mb-5">
                 {displaySteps}
-            </ol>
+            </ol> */}
         </>
     )
 }

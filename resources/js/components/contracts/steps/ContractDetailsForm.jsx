@@ -1,25 +1,25 @@
-const ContractDetailsForm = () => {
+const ContractDetailsForm = ({contractData, handleChange}) => {
     return (
-        <form class="space-y-6" action="#">
+        <form className="space-y-6" action="#">
             <div>
-                <label for="contract_id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Contract ID</label>
-                <input type="text" name="contract_id" id="contract_id" value={contractData.contract_id} onChange={handleChange} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="23FL0000" required />
+                <label for="contract_id" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Contract ID</label>
+                <input type="text" name="contract_id" id="contract_id" value={contractData.contract_id} onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="23FL0000" required />
             </div>
             <div className='mb-1'>
-                <label for="contract_title" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title</label>
-                <textarea id="contract_title" name="contract_title" placeholder="Construction of Infra...." value={contractData.contract_title} onChange={handleChange} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required />
+                <label for="contract_title" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Title</label>
+                <textarea id="contract_title" name="contract_title" placeholder="Construction of Infra...." value={contractData.contract_title} onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required />
             </div>
             <div>
-                <label for="contract_location" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Location</label>
-                <input type="textarea" name="contract_location" id="contract_location" value={contractData.contract_location} onChange={handleChange} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Brgy. Balud Norte, Gubat, Sorsogon...." required />
+                <label for="contract_location" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Location</label>
+                <input type="textarea" name="contract_location" id="contract_location" value={contractData.contract_location} onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Brgy. Balud Norte, Gubat, Sorsogon...." required />
             </div>
             <div className='mb-1'>
-                <label for="contract_details" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Details</label>
-                <textarea id="contract_details" name="contract_details" placeholder="...." value={contractData.contract_details} onChange={handleChange} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required />
+                <label for="contract_details" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Details</label>
+                <textarea id="contract_details" name="contract_details" placeholder="...." value={contractData.contract_details} onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required />
             </div>
             <div>
-                <label for="contract_approved_budget" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Approved Budget</label>
-                <input type="number" name="contract_approved_budget" id="contract_approved_budget" value={contractData.contraccontract_approved_budgett_details} onChange={handleChange} class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="P 99,000,000.00" required />
+                <label for="contract_approved_budget" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Approved Budget</label>
+                <input type="number" name="contract_approved_budget" id="contract_approved_budget" value={contractData.contraccontract_approved_budgett_details} onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="P 99,000,000.00" required />
             </div>
 
             {/* <label className='mt-3'>Bulletinboard Posting Schedule</label>

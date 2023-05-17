@@ -14,6 +14,7 @@
         "axios": "^1.1.2",
         "bootstrap": "^5.2.3",
         "flowbite": "^1.6.5",
+        "flowbite-typography": "^1.0.3",
         "laravel-vite-plugin": "^0.7.2",
         "postcss": "^8.4.23",
         "react": "^18.2.0",
@@ -26,6 +27,7 @@
         "dayjs": "^1.11.7",
         "flowbite-datepicker": "^1.2.2",
         "react-bootstrap": "^2.7.4",
-        "react-date-object": "^2.1.7"
+        "react-date-object": "^2.1.7",
+        "react-datepicker": "^4.11.0"
     }
 }

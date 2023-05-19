@@ -1,6 +1,27 @@
 import { Link, Head } from '@inertiajs/react';
+import moment from 'moment';
+import Container from 'react-bootstrap/Container';
+import { useEffect, useState } from 'react';
+import { Alert, Col, Row, Table } from 'react-bootstrap';
+import axios from 'axios';
 
 export default function Welcome({ auth, laravelVersion, phpVersion }) {
+
+    const [currentDateTime, setCurrentDateTime] = useState(new Date())
+    const [bacActivities, setBacActivities] = useState();
+
+    const getBacActivities = () => {
+        axios.get('/api/contract_schedule/bidding')
+        .then(res => {
+            setBacActivities(res)
+        })
+    }
+
+    useEffect(()=>{
+        getBacActivities()
+        setInterval(() => setCurrentDateTime(new Date()), 1000)
+    }, [])
+
     return (
         <>
             <Head title="Welcome" />
@@ -31,6 +52,60 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                         </>
                     )}
                 </div>
+
+                
+                
+
+                <Container fluid>
+                    <Row className='mt-5'>
+                        <Col lg={10}>
+                            <video autoPlay loop >
+                                <source src='../storage/videos/videoloop.mp4' type='video/mp4' />
+                            </video>
+                        </Col>
+                        <Col>
+                            <h1 className='text-center'>BAC Activities</h1>
+                            <Row className='h-50'>
+                                <Col lg={12}>
+                                    <Table>
+                                        <thead>
+                                            <tr>
+                                                <th className='text-center'>Pre-Bid Conference</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                        </tbody>
+                                    </Table>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col lg={12}>
+                                    <Table>
+                                        <thead>
+                                            <tr>
+                                                <th className='text-center'>Opening of Bids</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                        </tbody>
+                                    </Table>
+                                </Col>
+                            </Row>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col lg={12} className='mt-3'>
+                            <Alert variant='primary'><h1><b>{moment(currentDateTime).format('MMMM D, yyyy (dddd)')} - {currentDateTime.toLocaleTimeString()}</b></h1></Alert>
+                        </Col>
+                    </Row>
+                </Container>
+
+
+                    {/* <video autoPlay loop >
+                        <source src='../storage/videos/videoloop.mp4' type='video/mp4' />
+                    </video> */}
 
             </div>
         </>

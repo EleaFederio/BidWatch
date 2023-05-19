@@ -8,6 +8,7 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

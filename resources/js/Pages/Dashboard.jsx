@@ -6,6 +6,7 @@ import ContractDetailsForm from '@/components/contracts/steps/ContractDetailsFor
 import ContractScheduleForm from '@/components/contracts/steps/ContractScheduleForm';
 import { Head } from '@inertiajs/react';
 import axios from 'axios';
+import moment from 'moment/moment';
 import { useEffect, useState } from 'react';
 import DateObject from 'react-date-object';
 
@@ -41,6 +42,28 @@ export default function Dashboard({ auth }) {
             .then(res => {
                 setContracts(res.data)
                 // setContracts(res.data);
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    }
+
+    const addContract = () => {
+        let data = {
+            'contract_id' : contractData.contract_id,
+            'title' : contractData.contract_title,
+            'location' : contractData.contract_location,
+            'approved_budget' : contractData.contract_approved_budget,
+            'pre_bid' : moment(contractData.pre_bid).format('yyyy-MM-DD hh:mm:ss'),
+            'opening_of_bids' : moment(contractData.opening_of_bids).format('yyyy-MM-DD hh:mm:ss'),
+            'bulletin_posting' : moment(contractData.bulletin_posting).format('yyyy-MM-DD'),
+            'bulletin_removal' : moment(contractData.bulletin_removal).format('yyyy-MM-DD'),
+            'archieve' : false
+        }
+        axios.post('api/contracts', data)
+            .then(res => {
+                console.log(res)
+                getContracts()
             })
             .catch(error => {
                 console.log(error)
@@ -159,6 +182,8 @@ export default function Dashboard({ auth }) {
                         page={page}
                         formTitles={formTitles}
                         setPage={setPage}
+                        setModalDisplay={setModalDisplay}
+                        addContract={addContract}
                     />
                 </div>
             </div>

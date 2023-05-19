@@ -27,6 +27,7 @@
         "@material-tailwind/react": "^2.0.1",
         "dayjs": "^1.11.7",
         "flowbite-datepicker": "^1.2.2",
+        "moment": "^2.29.4",
         "react-bootstrap": "^2.7.4",
         "react-date-object": "^2.1.7",
         "react-datepicker": "^4.11.0",

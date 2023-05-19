@@ -14,15 +14,15 @@ export default function Dashboard({ auth }) {
     const [contracts, setContracts] = useState();
     const [apiUrl, setApiUrl] = useState('/api/contracts');
     const [contractData, setContractData] = useState({
-        contract_id : "22FL0025",
-        contract_title : "Hahaha",
+        contract_id : "23FL0000",
+        contract_title : "",
         contract_location : "",
         contract_details : "",
         contract_approved_budget : 0.00,
-        pre_bid : '2023-05-12 14:00:00',
-        opening_of_bids : '2023-05-30 10:30:00',
-        bulletin_posting : '2023-05-05',
-        bulletin_removal: '2023-05-11',
+        pre_bid : null,
+        opening_of_bids : null,
+        bulletin_posting : null,
+        bulletin_removal: null,
         archieve : false
     })
 
@@ -61,7 +61,7 @@ export default function Dashboard({ auth }) {
             case 0:
                 return <ContractDetailsForm contractData={contractData} handleChange={handleChange} />
             case 1:
-                return <ContractScheduleForm />
+                return <ContractScheduleForm contractData={contractData} setContractData={setContractData} handleChange={handleChange} />
         }
     }
 
@@ -155,10 +155,10 @@ export default function Dashboard({ auth }) {
                     <div>
                         {pageDisplay()}
                     </div>
-                    <StepperControl 
+                    <StepperControl
                         page={page}
-                        formTitles={formTitles} 
-                        setPage={setPage} 
+                        formTitles={formTitles}
+                        setPage={setPage}
                     />
                 </div>
             </div>

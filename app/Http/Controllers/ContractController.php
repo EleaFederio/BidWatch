@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ContractListResource;
 use App\Http\Resources\ContractsResource;
 use App\Models\Contract;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use \PDF;
 
@@ -19,9 +21,19 @@ class ContractController extends Controller
 
     public function index()
     {
-        $contracts = Contract::all();
+        $contracts = DB::table('contracts')->orderBy('id', 'DESC')->paginate(6);
         // return $contracts;
-        return ContractsResource::collection(Contract::paginate(6));
+        return ContractsResource::collection($contracts);
+    }
+
+    public function bacSchedule(){
+        $openingOfBids = DB::table('contracts')->whereDate('opening_of_bids', Carbon::today())->orderBy('opening_of_bids', 'DESC')->get();
+        $preBidConference = DB::table('contracts')->whereDate('pre_bid', Carbon::today())->orderBy('pre_bid', 'DESC')->get();
+        return response()->json([
+            'success' => true,
+            'opening_of_bids' => ContractsResource::collection($openingOfBids),
+            'pre_bid_conference' => ContractsResource::collection($preBidConference)
+        ]);
     }
 
     /**

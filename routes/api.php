@@ -20,3 +20,4 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::apiResource('/contracts', ContractController::class);
+Route::get('/contract_schedule/bidding', [ContractController::class, 'bacSchedule']);

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('contracts', function (Blueprint $table) {
             $table->id();
             $table->string('contract_id');
-            $table->string('title');
+            $table->longText('title');
             $table->longText('description')->nullable();
             $table->string('location')->nullable();
             $table->decimal('approved_budget', 15, 2);

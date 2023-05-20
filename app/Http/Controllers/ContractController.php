@@ -31,8 +31,8 @@ class ContractController extends Controller
         $preBidConference = DB::table('contracts')->whereDate('pre_bid', Carbon::today())->orderBy('pre_bid', 'DESC')->get();
         return response()->json([
             'success' => true,
-            'opening_of_bids' => $openingOfBids,
-            'pre_bid_conference' => $preBidConference
+            'opening_of_bids' => ContractsResource::collection($openingOfBids),
+            'pre_bid_conference' => ContractsResource::collection($preBidConference)
         ]);
     }
 

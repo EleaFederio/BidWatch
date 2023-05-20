@@ -8,12 +8,15 @@ import axios from 'axios';
 export default function Welcome({ auth, laravelVersion, phpVersion }) {
 
     const [currentDateTime, setCurrentDateTime] = useState(new Date())
-    const [bacActivities, setBacActivities] = useState();
+    const [preBidConferences, setPreBidConferences] = useState([]);
+    const [openingOfBids, setOpeningOfBids] = useState([]);
 
     const getBacActivities = () => {
         axios.get('/api/contract_schedule/bidding')
         .then(res => {
-            setBacActivities(res)
+            // console.log(res.data.pre_bid_conference[0])
+            setPreBidConferences(res.data.pre_bid_conference)
+            setOpeningOfBids(res.data.opening_of_bids)
         })
     }
 
@@ -74,7 +77,21 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                                             </tr>
                                         </thead>
                                         <tbody>
-
+                                                {
+                                                    !preBidConferences ?
+                                                    <h3>loading...</h3> :
+                                                    // console.log(preBidConferences)
+                                                    preBidConferences.map((preBidConference) => {
+                                                        return(
+                                                            <Alert variant='secondary' style={{marginBottom: 5, paddingTop: 5, paddingBottom: 5}}>
+                                                                <p style={{marginBottom: 0, paddingTop: 0, paddingBottom: 0}}><b>{preBidConference.contract_id}</b> <small>Today{moment(preBidConference.pre_bid_schedule).format(' @ hh:mm a')}</small></p>
+                                                                <p style={{marginBottom: 0, paddingTop: 0, paddingBottom: 0, fontSize: 10}}>
+                                                                    <small>{preBidConference.title}</small>
+                                                                </p>
+                                                            </Alert>
+                                                        )
+                                                    })
+                                                }
                                         </tbody>
                                     </Table>
                                 </Col>
@@ -88,7 +105,21 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                                             </tr>
                                         </thead>
                                         <tbody>
-
+                                            {
+                                                !openingOfBids ?
+                                                <h3>loading...</h3> :
+                                                // console.log(openingOfBids)
+                                                openingOfBids.map((openingOfBid) => {
+                                                    return(
+                                                        <Alert variant='secondary' style={{marginBottom: 5, paddingTop: 5, paddingBottom: 5}}>
+                                                            <p style={{marginBottom: 0, paddingTop: 0, paddingBottom: 0}}><b>{openingOfBid.contract_id}</b> <small>Today{moment(openingOfBid.opening_of_bids_schedule).format(' @ hh:mm a')}</small></p>
+                                                            <p style={{marginBottom: 0, paddingTop: 0, paddingBottom: 0, fontSize: 10}}>
+                                                                <small>{openingOfBid.title}</small>
+                                                            </p>
+                                                        </Alert>
+                                                    )
+                                                })
+                                            }
                                         </tbody>
                                     </Table>
                                 </Col>

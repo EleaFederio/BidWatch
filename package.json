@@ -24,6 +24,7 @@
         "vite": "^4.3.4"
     },
     "dependencies": {
+        "@material-tailwind/html": "^2.0.0",
         "@material-tailwind/react": "^2.0.1",
         "dayjs": "^1.11.7",
         "flowbite-datepicker": "^1.2.2",

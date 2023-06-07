@@ -5,9 +5,12 @@ import StepperControl from '@/components/contracts/StepperControl';
 import ContractDetailsForm from '@/components/contracts/steps/ContractDetailsForm';
 import ContractScheduleForm from '@/components/contracts/steps/ContractScheduleForm';
 import { Head } from '@inertiajs/react';
+import { Breadcrumbs, Card, CardBody, CardFooter, Typography } from '@material-tailwind/react';
+import { auto } from '@popperjs/core';
 import axios from 'axios';
 import moment from 'moment/moment';
 import { useEffect, useState } from 'react';
+import { Button } from 'react-bootstrap';
 import DateObject from 'react-date-object';
 
 export default function Dashboard({ auth }) {
@@ -88,6 +91,18 @@ export default function Dashboard({ auth }) {
         }
     }
 
+    const downloadContract = (contract_id) => {
+        console.log('contract/certification/' + contract_id);
+        axios.get('contract/certification/' + contract_id, {responseType: 'blob'})
+        .then(response => {
+            console.log(response);
+            window.open(URL.createObjectURL(response.data));
+        })
+        .catch(error => {
+
+        })
+    }
+
     useEffect(() => {
         getContracts();
     }, [apiUrl]);
@@ -99,7 +114,7 @@ export default function Dashboard({ auth }) {
         >
             <Head title="Dashboard" />
 
-            <div className="container static mx-auto mt-8 grid grid-cols-3 gap-8">
+            <div className="container-fluid static mx-auto mt-8 grid grid-cols-3 gap-8">
 
                 {
 
@@ -113,17 +128,31 @@ export default function Dashboard({ auth }) {
                     // console.log(contracts.data)
                     contracts.data.map((contract) => {
                         return (
-                            <div className="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-                                <a href="#">
-                                    <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{contract.contract_id}</h5>
-                                </a>
-                                <p className="mb-1 text-2xm font-bold text-gray-700 dark:text-gray-400">{contract.title}</p>
-                                {/* <h2 class=" text-lg font-bold text-gray-900 dark:text-white">BID Schedule</h2> */}
-                                <p><small>Pre-Bid Conference: <b>{contract.pre_bid_schedule === null ? '---' : new DateObject(contract.pre_bid_schedule).format("MMMM DD, YYYY @ hh:mm a")}</b></small></p>
-                                <p><small>Opening of Bids: <b>{new DateObject(contract.opening_of_bids_schedule).format("MMMM DD, YYYY @ hh:mm a")}</b></small></p>
-                                <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">Posting: {contract.bulletinboard_posting} to {contract.bulletinboard_removal}</p>
-                                <a href={'http://127.0.0.1:8000/contract/certification/' + contract.contract_id} target='_blank' className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Certification</a>
-                            </div>
+                            <Card className='d-flex flex-column'>
+                                <CardBody style={{paddingBottom: 0}}>
+                                    <Typography variant="h5" color="deep-purple">{contract.contract_id}</Typography>
+                                    <Typography style={{marginBottom:0}}>{contract.title}</Typography>
+                                    <Breadcrumbs style={{marginBottom: 0}}>
+                                        <span><small>Pre-Bid Conference: <b>{contract.pre_bid_schedule === null ? '---' : new DateObject(contract.pre_bid_schedule).format("MMMM DD, YYYY @ hh:mm a")}</b></small></span>
+                                        <span><small>Opening of Bids: <b>{new DateObject(contract.opening_of_bids_schedule).format("MMMM DD, YYYY @ hh:mm a")}</b></small></span>
+                                    </Breadcrumbs>
+                                </CardBody>
+                                <div className='mt-auto p-3'>
+                                    <Button>View Details</Button>
+                                    <Button href={'contract/certification/' + contract.contract_id} size='sm' target='_blank' variant='link' style={{marginTop: auto}}>Certification</Button>
+                                </div>
+                            </Card>
+                            // <div className="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                            //     <a href="#">
+                            //         <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">CardContent</h5>
+                            //     </a>
+                            //     <p className="mb-1 text-2xm font-bold text-gray-700 dark:text-gray-400">{contract.title}</p>
+                            //     {/* <h2 class=" text-lg font-bold text-gray-900 dark:text-white">BID Schedule</h2> */}
+                            //     <p><small>Pre-Bid Conference: <b>{contract.pre_bid_schedule === null ? '---' : new DateObject(contract.pre_bid_schedule).format("MMMM DD, YYYY @ hh:mm a")}</b></small></p>
+                            //     <p><small>Opening of Bids: <b>{new DateObject(contract.opening_of_bids_schedule).format("MMMM DD, YYYY @ hh:mm a")}</b></small></p>
+                            //     <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">Posting: {contract.bulletinboard_posting} to {contract.bulletinboard_removal}</p>
+                            //     <a href={'http://127.0.0.1:8000/contract/certification/' + contract.contract_id} target='_blank' className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ">Certification</a>
+                            // </div>
                         )
                     })
                 }

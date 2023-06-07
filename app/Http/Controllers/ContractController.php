@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ContractListResource;
 use App\Http\Resources\ContractsResource;
+use App\Http\Resources\MonthlyContracts;
+use App\Http\Resources\MonthlyOpeningOfBidsCollection;
+use App\Http\Resources\MonthlyPreBidCollection;
 use App\Models\Contract;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -121,6 +125,19 @@ class ContractController extends Controller
         ]);
     }
 
+    public function threeMonthRecord(){
+        $currentMonth = Carbon::create('2023-05-05')->month;
+        $prebid = MonthlyPreBidCollection::collection(Contract::whereYear('pre_bid', date('Y'))->get());
+        $openingOfBids = MonthlyOpeningOfBidsCollection::collection(Contract::whereYear('opening_of_bids', date('Y'))->get());
+
+        $prebidCollection = new Collection($prebid);
+        $openingOfBidsCollection = new Collection($openingOfBids);
+
+        $scheduleObject = array_merge($openingOfBidsCollection->toArray(), $prebidCollection ->toArray());
+
+        return $scheduleObject;
+    }
+
     /**
      * Remove the specified resource from storage.
      */
@@ -156,6 +173,6 @@ class ContractController extends Controller
         $pdf = PDF::loadView('pdf/posting_certification', $contract->toArray());
         $pdf->setPaper('A4', 'portrait');
         $pdf->setOption('margin: 50em 500em 300em 1em;');
-        return $pdf->stream('pdf_file.pdf');
+        return $pdf->stream($contractID."_contract_certification.pdf");
     }
 }

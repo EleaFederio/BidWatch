@@ -28,19 +28,24 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
     return (
         <>
             <div style={{backgroundImage: '../storage/images/background.JPG'}}>
-                <Head title="Welcome" />
+                <Head title="Bulletin" />
                 <div className="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-dots-darker bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white">
                     <div className="sm:fixed sm:top-0 sm:right-0 p-6 text-right">
                         {auth.user ? (
                             <>
-
-                                <Link
-                                    href={route('dashboard')}
-                                    className="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500"
-                                >
-                                    Dashboard
-                                </Link>
-
+                                <Row>
+                                    <Col>
+                                        <h4>Digital Information Bulletin</h4>
+                                    </Col>
+                                    <Col>
+                                        <Link
+                                            href={route('dashboard')}
+                                            className="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500"
+                                        >
+                                            Dashboard
+                                        </Link>
+                                    </Col>
+                                </Row>
                                 <Container fluid>
                                     <Row className='mt-2'>
                                         <Col lg={10} style={{paddingLeft: 0}}>
@@ -112,7 +117,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                                         <Col lg={12} className='mt-3' style={{padding: 0}}>
                                             <Alert variant='primary' style={{paddingTop: 0, paddingBottom: 0, marginBottom: 0, borderRadius: 0, backgroundColor: '#0d0963', padding: 0}}>
                                                 <h1 className='text-center' style={{marginBottom: 0, color: 'white'}}>
-                                                    <b style={{fontSize:105}}>{moment(currentDateTime).format('MMMM D, yyyy (dddd)')} - {currentDateTime.toLocaleTimeString()}</b>
+                                                    <b style={{fontSize:100}}>{moment(currentDateTime).format('MMMM D, yyyy (dddd)')} - {currentDateTime.toLocaleTimeString()}</b>
                                                 </h1>
                                             </Alert>
                                         </Col>

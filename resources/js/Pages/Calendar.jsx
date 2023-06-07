@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { ViewState } from '@devexpress/dx-react-scheduler';
-import { Appointments, DateNavigator, MonthView, Scheduler, TodayButton, Toolbar } from '@devexpress/dx-react-scheduler-material-ui';
+import { Appointments, DateNavigator, DayView, MonthView, Scheduler, TodayButton, Toolbar, ViewSwitcher } from '@devexpress/dx-react-scheduler-material-ui';
 import { Head } from '@inertiajs/react';
 import { Paper } from '@mui/material';
 import axios from 'axios';
@@ -44,9 +44,11 @@ export default function Dashboard({ auth }) {
                         <Scheduler
                             data={data}
                         >
-                            <ViewState currentDate={new Date('2023-05-06')} />
+                            <ViewState defaultCurrentDate={new Date('2023-05-06')} />
                             <MonthView />
+                            <DayView />
                             <Toolbar/>
+                            <ViewSwitcher/>
                             <DateNavigator/>
                             <TodayButton/>
                             <Appointments />

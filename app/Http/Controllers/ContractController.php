@@ -127,13 +127,13 @@ class ContractController extends Controller
 
     public function threeMonthRecord(){
         $currentMonth = Carbon::create('2023-05-05')->month;
-        $prebid = MonthlyPreBidCollection::collection(DB::table('contracts')->whereRaw('MONTH(pre_bid) = ?',[$currentMonth])->get());
-        $openingOfBids = MonthlyOpeningOfBidsCollection::collection(DB::table('contracts')->whereRaw('MONTH(opening_of_bids) = ?',[$currentMonth])->get());
+        $prebid = MonthlyPreBidCollection::collection(Contract::whereYear('pre_bid', date('Y'))->get());
+        $openingOfBids = MonthlyOpeningOfBidsCollection::collection(Contract::whereYear('opening_of_bids', date('Y'))->get());
 
         $prebidCollection = new Collection($prebid);
         $openingOfBidsCollection = new Collection($openingOfBids);
 
-        $scheduleObject = array_merge($prebidCollection ->toArray(), $openingOfBidsCollection->toArray());
+        $scheduleObject = array_merge($openingOfBidsCollection->toArray(), $prebidCollection ->toArray());
 
         return $scheduleObject;
     }

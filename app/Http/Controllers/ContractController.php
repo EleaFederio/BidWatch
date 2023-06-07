@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ContractListResource;
 use App\Http\Resources\ContractsResource;
 use App\Http\Resources\MonthlyContracts;
+use App\Http\Resources\MonthlyOpeningOfBidsCollection;
+use App\Http\Resources\MonthlyPreBidCollection;
 use App\Models\Contract;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -123,10 +126,16 @@ class ContractController extends Controller
     }
 
     public function threeMonthRecord(){
-        $record = Contract::whereYear('created_at', Carbon::now()->year)
-                ->whereMonth('created_at', Carbon::now()->month)
-                ->get();
-        return MonthlyContracts::collection($record);
+        $currentMonth = Carbon::create('2023-05-05')->month;
+        $prebid = MonthlyPreBidCollection::collection(DB::table('contracts')->whereRaw('MONTH(pre_bid) = ?',[$currentMonth])->get());
+        $openingOfBids = MonthlyOpeningOfBidsCollection::collection(DB::table('contracts')->whereRaw('MONTH(opening_of_bids) = ?',[$currentMonth])->get());
+
+        $prebidCollection = new Collection($prebid);
+        $openingOfBidsCollection = new Collection($openingOfBids);
+
+        $scheduleObject = array_merge($prebidCollection ->toArray(), $openingOfBidsCollection->toArray());
+
+        return $scheduleObject;
     }
 
     /**

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class MonthlyContracts extends JsonResource
+class MonthlyPreBidCollection extends JsonResource
 {
     /**
      * Transform the resource collection into an array.

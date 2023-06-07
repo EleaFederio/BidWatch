@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ContractListResource;
 use App\Http\Resources\ContractsResource;
+use App\Http\Resources\MonthlyContracts;
 use App\Models\Contract;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -119,6 +120,13 @@ class ContractController extends Controller
             'success' => false,
             'message' => 'Contract doesn\'t exist!'
         ]);
+    }
+
+    public function threeMonthRecord(){
+        $record = Contract::whereYear('created_at', Carbon::now()->year)
+                ->whereMonth('created_at', Carbon::now()->month)
+                ->get();
+        return MonthlyContracts::collection($record);
     }
 
     /**

@@ -12,7 +12,7 @@ class OfficerController extends Controller
      */
     public function index()
     {
-        //
+        return Officer::all();
     }
 
     /**

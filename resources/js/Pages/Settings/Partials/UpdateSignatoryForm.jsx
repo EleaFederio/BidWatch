@@ -19,7 +19,6 @@ export default function UpdateSignatoryForm({ className = '' }) {
                 <Button>Update</Button>
             </header>
 
-
         </section>
     );
 }

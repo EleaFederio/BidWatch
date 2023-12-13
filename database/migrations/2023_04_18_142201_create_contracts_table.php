@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('location')->nullable();
             $table->decimal('approved_budget', 15, 2);
             $table->dateTime('pre_bid')->nullable();
-            $table->dateTime('opening_of_bids');
+            $table->dateTime('opening_of_bids')->nullable();
             $table->date('bulletin_posting');
             $table->date('bulletin_removal');
             $table->boolean('archieve')->default(false);

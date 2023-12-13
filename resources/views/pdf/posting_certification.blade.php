@@ -93,10 +93,10 @@
                 <div class="text-center">
                     <!-- This should be base from the fetch data from API -->
                     <hr style="margin-bottom: 0px;"/>
-                    <!-- <p style="margin-top:0px; font-size: 12"><b>Levi D. Pura, Jr.</b></p>
-                    <p style="color: #333"><small>Administrative Officer V / PIO Designate</small></p> -->
-                    <p style="margin-top:0px; font-size: 12"><b>Kenneth G. Rabulan</b></p>
-                    <p style="color: #333"><small>Alternate PIO - Designate</small></p>
+                    <p style="margin-top:0px; font-size: 12"><b>Levi D. Pura, Jr.</b></p>
+                    <p style="color: #333"><small>Administrative Officer V / PIO Designate</small></p>
+                    <!-- <p style="margin-top:0px; font-size: 12"><b>Kenneth G. Rabulan</b></p>
+                    <p style="color: #333"><small>Alternate PIO - Designate</small></p> -->
                 </div>
             </td>
         </tr>

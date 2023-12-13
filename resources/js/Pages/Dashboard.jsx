@@ -134,7 +134,7 @@ export default function Dashboard({ auth }) {
                                     <Typography style={{marginBottom:0}}>{contract.title}</Typography>
                                     <Breadcrumbs style={{marginBottom: 0}}>
                                         <span><small>Pre-Bid Conference: <b>{contract.pre_bid_schedule === null ? '---' : new DateObject(contract.pre_bid_schedule).format("MMMM DD, YYYY @ hh:mm a")}</b></small></span>
-                                        <span><small>Opening of Bids: <b>{new DateObject(contract.opening_of_bids_schedule).format("MMMM DD, YYYY @ hh:mm a")}</b></small></span>
+                                        <span><small>Opening of Bids: <b style={{color: contract.opening_of_bids_schedule === null ? 'red' : 'black'}}>{contract.opening_of_bids_schedule === null ? 'Cancelled' : new DateObject(contract.opening_of_bids_schedule).format("MMMM DD, YYYY @ hh:mm a")}</b></small></span>
                                     </Breadcrumbs>
                                     <p className="mb-3 font-normal text-gray-700 dark:text-gray-400"><small>Posting: {contract.bulletinboard_posting} to {contract.bulletinboard_removal}</small></p>
                                 </CardBody>

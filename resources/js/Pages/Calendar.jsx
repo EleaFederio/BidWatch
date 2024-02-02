@@ -13,7 +13,7 @@ export default function Dashboard({ auth }) {
     const [data, setData] = useState([]);
 
     const getMonthlySchedule = () => {
-        axios.get('http://127.0.0.1:8000/api/contract_schedule/month')
+        axios.get('api/contract_schedule/month')
             .then(res => {
                 console.log(res.data)
                 setData(res.data)
@@ -44,7 +44,7 @@ export default function Dashboard({ auth }) {
                         <Scheduler
                             data={data}
                         >
-                            <ViewState defaultCurrentDate={new Date('2023-05-06')} />
+                            <ViewState defaultCurrentDate={new Date()} />
                             <MonthView />
                             <DayView />
                             <Toolbar/>

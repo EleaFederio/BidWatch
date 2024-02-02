@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ContractController;
+use App\Http\Controllers\OfficerController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,3 +23,4 @@ use Illuminate\Support\Facades\Route;
 Route::apiResource('/contracts', ContractController::class);
 Route::get('/contract_schedule/bidding', [ContractController::class, 'bacSchedule']);
 Route::get('/contract_schedule/month', [ContractController::class, 'threeMonthRecord']);
+Route::apiResource('/officers', OfficerController::class);

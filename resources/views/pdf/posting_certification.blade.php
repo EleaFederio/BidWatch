@@ -62,11 +62,14 @@
             <!-- Header -->
             <div class="text-center">
                 <p><small>Republic of the Philippines</small></p>
-                <p style="font-size: 13;">DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS</p>
-                <p><b>SORSOGON SECOND</b></p>
-                <p><b>DISTRICT ENGINEERING OFFICE</b></p>
-                <p><small>REGIONAL OFFICE V</small></p>
-                <p><small>Payawin, Gubat, Sorsogon</small></p>
+                <p style="font-size: 12;">DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS</p>
+                <p style="font-size: 11;"><b>SORSOGON SECOND DISTRICT ENGINEERING OFFICE</b></p>
+                <p style="font-size: 10;"><small>Payawin, Gubat, Sorsogon Region V</small></p>
+            </div>
+        </td>
+        <td class="logo-cell">
+            <div class="text-center">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Bagong_Pilipinas_logo.png" width="105" style="margin-top: 0;" />
             </div>
         </td>
       </tr>
@@ -90,8 +93,10 @@
                 <div class="text-center">
                     <!-- This should be base from the fetch data from API -->
                     <hr style="margin-bottom: 0px;"/>
-                    <p style="margin-top:0px; font-size: 12"><b>LEVI D. PURA Jr.</b></p>
-                    <p style="color: #333"><small>Administrative Officer IV/PIO Designate</small></p>
+                    <p style="margin-top:0px; font-size: 12"><b>Levi D. Pura, Jr.</b></p>
+                    <p style="color: #333"><small>Administrative Officer V / PIO Designate</small></p>
+                    <!-- <p style="margin-top:0px; font-size: 12"><b>Kenneth G. Rabulan</b></p>
+                    <p style="color: #333"><small>Alternate PIO - Designate</small></p> -->
                 </div>
             </td>
         </tr>

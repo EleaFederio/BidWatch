@@ -13,6 +13,7 @@ export default function Authenticated({ user, header, children }) {
             <nav className="bg-white border-b border-gray-100">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
+                        {/* Desktop View */}
                         <div className="flex">
                             <div className="shrink-0 flex items-center">
                                 <Link href="/">
@@ -29,6 +30,11 @@ export default function Authenticated({ user, header, children }) {
                             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                                 <NavLink href={route('calendar')} active={route().current('calendar')}>
                                     Calendar
+                                </NavLink>
+                            </div>
+                            <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                                <NavLink href={route('map')} active={route().current('map')}>
+                                    Infra Map
                                 </NavLink>
                             </div>
                         </div>
@@ -105,8 +111,12 @@ export default function Authenticated({ user, header, children }) {
                         <ResponsiveNavLink href={route('calendar')} active={route().current('calendar')}>
                             Calendar
                         </ResponsiveNavLink>
+                        <ResponsiveNavLink href={route('map')} active={route().current('map')}>
+                            Infra Map
+                        </ResponsiveNavLink>
                     </div>
 
+                    {/* Mobile Responsive View */}
                     <div className="pt-4 pb-1 border-t border-gray-200">
                         <div className="px-4">
                             <div className="font-medium text-base text-gray-800">{user.name}</div>

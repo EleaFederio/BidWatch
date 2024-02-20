@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Button, Col, FormSelect } from "react-bootstrap";
+import introTrack from '../../sounds/announcement_sounds/Intro.wav';
+import outroTrack from '../../sounds/announcement_sounds/Outro.wav';
 
 const TextToSpeech = ({ text }) => {
   const [isPaused, setIsPaused] = useState(false);
   const [utterance, setUtterance] = useState(null);
   const [voice, setVoice] = useState(null);
+  const intro = new Audio(introTrack);
+  const outro = new Audio(outroTrack);
 
   useEffect(() => {
     const synth = window.speechSynthesis;
@@ -27,9 +31,17 @@ const TextToSpeech = ({ text }) => {
     }else{
         utterance.voice = voice;
     }
-
-    synth.speak(utterance);
-
+    intro.volume = 0.5;
+    intro.play();
+    utterance.onend = function(event){
+      intro.volume = 0.5;
+      outro.play();
+    }
+    intro.onended = () => {
+      synth.speak(utterance);
+    }
+    
+  
     setIsPaused(false);
   };
 

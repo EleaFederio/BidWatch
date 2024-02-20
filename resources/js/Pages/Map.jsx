@@ -49,18 +49,7 @@ const Map = ({ auth }) => {
 
             </Container>
 
-            isLoaded ?  (
-                    <GoogleMap
-                      mapContainerStyle={containerStyle}
-                      center={center}
-                      zoom={10}
-                      onLoad={onLoad}
-                      onUnmount={onUnmount}
-                    >
-                      { /* Child components, such as markers, info windows, etc. */ }
-                      <></>
-                    </GoogleMap>
-                )
+            <h1>Map here...</h1>
 
         </AuthenticatedLayout>
     )

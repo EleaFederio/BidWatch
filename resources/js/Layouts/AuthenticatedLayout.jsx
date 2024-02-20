@@ -37,6 +37,11 @@ export default function Authenticated({ user, header, children }) {
                                     Infra Map
                                 </NavLink>
                             </div>
+                            <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                                <NavLink href={route('announcer')} active={route().current('announcer')}>
+                                    Announcer
+                                </NavLink>
+                            </div>
                         </div>
 
                         <div className="hidden sm:flex sm:items-center sm:ml-6">
@@ -113,6 +118,9 @@ export default function Authenticated({ user, header, children }) {
                         </ResponsiveNavLink>
                         <ResponsiveNavLink href={route('map')} active={route().current('map')}>
                             Infra Map
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink href={route('announcer')} active={route().current('map')}>
+                            Announcer
                         </ResponsiveNavLink>
                     </div>
 

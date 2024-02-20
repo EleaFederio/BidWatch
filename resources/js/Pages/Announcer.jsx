@@ -1,8 +1,13 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import TextToSpeech from '@/lib/TextToSpeech';
 import { Head } from '@inertiajs/react';
-import { Button, Card, Col, Container, FormControl, FormGroup, FormLabel, Row } from 'react-bootstrap';
+import { useState } from 'react';
+import { Card, Col, Container, FormControl, FormGroup, FormLabel, Row } from 'react-bootstrap';
 
 const Announcer = ({auth}) => {
+
+    const [text, setText] = useState('');
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -21,11 +26,16 @@ const Announcer = ({auth}) => {
                             <Card.Body>
                                 <FormGroup>
                                     <FormLabel>Announcement</FormLabel>
-                                    <FormControl as='textarea' rows={10} />
+                                    <FormControl
+                                        as='textarea'
+                                        rows={10}
+                                        value={text}
+                                        onChange={(e) => setText(e.target.value)}
+                                    />
                                 </FormGroup>
                             </Card.Body>
                             <Card.Footer className='text-center'>
-                                <Button lg>Announce</Button>
+                                <TextToSpeech text={text}/>
                             </Card.Footer>
                         </Card>
                     </Col>

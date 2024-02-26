@@ -4,6 +4,7 @@ import '../css/app.css';
 import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import 'react-datepicker/dist/react-datepicker.css'
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 import 'bootstrap/dist/css/bootstrap.min.css';

@@ -33,6 +33,12 @@ Route::get('/dashboard', function () {
 Route::get('/calendar', function () {
     return Inertia::render('Calendar');
 })->middleware(['auth', 'verified'])->name('calendar');
+Route::get('/map', function () {
+    return Inertia::render('Map');
+})->middleware(['auth', 'verified'])->name('map');
+Route::get('/announcer', function () {
+    return Inertia::render('Announcer');
+})->middleware(['auth', 'verified'])->name('announcer');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

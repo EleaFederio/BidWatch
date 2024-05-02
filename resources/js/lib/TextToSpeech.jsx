@@ -31,17 +31,17 @@ const TextToSpeech = ({ text }) => {
     }else{
         utterance.voice = voice;
     }
-    intro.volume = 0.5;
+    intro.volume = 0.3;
     intro.play();
     utterance.onend = function(event){
-      intro.volume = 0.5;
+      outro.volume = 0.3;
       outro.play();
     }
     intro.onended = () => {
       synth.speak(utterance);
     }
-    
-  
+
+
     setIsPaused(false);
   };
 

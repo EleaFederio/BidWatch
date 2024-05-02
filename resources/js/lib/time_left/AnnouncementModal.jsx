@@ -12,9 +12,6 @@ const AnnouncementModal = ({showModal, setShowModal}) => {
         date: new Date(),
     });
 
-
-
-
     function handleChange(evt) {
         const value = evt.target.value;
         setAnnouncement({
@@ -69,7 +66,7 @@ const AnnouncementModal = ({showModal, setShowModal}) => {
 
 
             <Modal.Footer>
-                <Button variant="info" size="sm" onClick={() => setShowModal(false)}>Close</Button>
+                <Button variant="danger" size="sm" onClick={() => setShowModal(false)}>Close</Button>
                 <Button variant="primary" size="sm" onClick={() => submitCreateAnnouncement()}>Create</Button>
             </Modal.Footer>
         </Modal>

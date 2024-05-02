@@ -47,7 +47,7 @@ const Announcer = ({auth}) => {
                                 <h4 className='text-center'>Scheduled Announcement</h4>
                             </Card.Header>
                             <Card.Body>
-                                <Button className='mb-3' variant='info' onClick={() => setShowModal(true)}>Create Scheduled Announcement</Button>
+                                <Button className='mb-3' style={{backgroundColor: '#fd7702'}} variant='info' onClick={() => setShowModal(true)}>Create Scheduled Announcement</Button>
                                 <Card >
                                     <Card.Body>
                                         <h5>Hello</h5>

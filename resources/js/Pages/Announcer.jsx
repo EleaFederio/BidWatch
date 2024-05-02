@@ -1,12 +1,14 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import TextToSpeech from '@/lib/TextToSpeech';
+import AnnouncementModal from '@/lib/time_left/AnnouncementModal';
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
-import { Card, Col, Container, FormControl, FormGroup, FormLabel, Row } from 'react-bootstrap';
+import { Button, Card, Col, Container, FormControl, FormGroup, FormLabel, Row } from 'react-bootstrap';
 
 const Announcer = ({auth}) => {
 
     const [text, setText] = useState('');
+    const [showModal, setShowModal] = useState(false);
 
     return (
         <AuthenticatedLayout
@@ -44,10 +46,19 @@ const Announcer = ({auth}) => {
                             <Card.Header>
                                 <h4 className='text-center'>Scheduled Announcement</h4>
                             </Card.Header>
+                            <Card.Body>
+                                <Button className='mb-3' variant='info' onClick={() => setShowModal(true)}>Create Scheduled Announcement</Button>
+                                <Card >
+                                    <Card.Body>
+                                        <h5>Hello</h5>
+                                    </Card.Body>
+                                </Card>
+                            </Card.Body>
                         </Card>
                     </Col>
                 </Row>
             </Container>
+            <AnnouncementModal showModal={showModal} setShowModal={setShowModal} />
         </AuthenticatedLayout>
     )
 }

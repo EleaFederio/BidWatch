@@ -56,6 +56,7 @@ export default function Dashboard({ auth }) {
             'contract_id' : contractData.contract_id,
             'title' : contractData.contract_title,
             'location' : contractData.contract_location,
+            'description' : contractData.contract_details,
             'approved_budget' : contractData.contract_approved_budget,
             'pre_bid' : moment(contractData.pre_bid).format('yyyy-MM-DD hh:mm:ss'),
             'opening_of_bids' : moment(contractData.opening_of_bids).format('yyyy-MM-DD hh:mm:ss'),
@@ -125,7 +126,6 @@ export default function Dashboard({ auth }) {
                         </div>
                     )
                     :
-                    // console.log(contracts.data)
                     contracts.data.map((contract) => {
                         return (
                             <Card className='d-flex flex-column'>
@@ -143,17 +143,6 @@ export default function Dashboard({ auth }) {
                                     <Button href={'contract/certification/' + contract.contract_id} size='sm' target='_blank' variant='link' style={{marginTop: auto}}>Certification</Button>
                                 </div>
                             </Card>
-                            // <div className="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-                            //     <a href="#">
-                            //         <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">CardContent</h5>
-                            //     </a>
-                            //     <p className="mb-1 text-2xm font-bold text-gray-700 dark:text-gray-400">{contract.title}</p>
-                            //     {/* <h2 class=" text-lg font-bold text-gray-900 dark:text-white">BID Schedule</h2> */}
-                            //     <p><small>Pre-Bid Conference: <b>{contract.pre_bid_schedule === null ? '---' : new DateObject(contract.pre_bid_schedule).format("MMMM DD, YYYY @ hh:mm a")}</b></small></p>
-                            //     <p><small>Opening of Bids: <b>{new DateObject(contract.opening_of_bids_schedule).format("MMMM DD, YYYY @ hh:mm a")}</b></small></p>
-                            //     <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">Posting: {contract.bulletinboard_posting} to {contract.bulletinboard_removal}</p>
-                            //     <a href={'http://127.0.0.1:8000/contract/certification/' + contract.contract_id} target='_blank' className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 ">Certification</a>
-                            // </div>
                         )
                     })
                 }

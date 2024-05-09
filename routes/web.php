@@ -33,6 +33,9 @@ Route::get('/dashboard', function () {
 Route::get('/calendar', function () {
     return Inertia::render('Calendar');
 })->middleware(['auth', 'verified'])->name('calendar');
+Route::get('/photos', function () {
+    return Inertia::render('PhotoManager');
+})->middleware(['auth', 'verified'])->name('photos');
 Route::get('/map', function () {
     return Inertia::render('Map');
 })->middleware(['auth', 'verified'])->name('map');

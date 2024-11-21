@@ -3,6 +3,7 @@ import { Head } from "@inertiajs/react"
 import { Container } from "react-bootstrap"
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 import React from 'react'
+import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet';
 
 const containerStyle = {
     width: '400px',
@@ -46,11 +47,19 @@ const Map = ({ auth }) => {
                 <title>Bid-Watch - Calendar</title>
             </Head>
             <Container>
-
+                <h1>Map here...</h1>
+                <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false}>
+                    <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <Marker position={[51.505, -0.09]}>
+                        <Popup>
+                                    pretty CSS3 popup. <br /> Easily customizable.
+                        </Popup>
+                    </Marker>
+                </MapContainer>
             </Container>
-
-            <h1>Map here...</h1>
-
         </AuthenticatedLayout>
     )
 }

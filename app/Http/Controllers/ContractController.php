@@ -170,6 +170,8 @@ class ContractController extends Controller
                 'message' => 'Contract Doesn\'t Exist!'
             ]);
         }
+        ini_set('max_execution_time', 300); // Increase execution time to 5 minutes
+        ini_set('memory_limit', '2048M'); // Increase memory limit to 2GB
         $pdf = PDF::loadView('pdf/posting_certification', $contract->toArray());
         $pdf->setPaper('A4', 'portrait');
         $pdf->setOption('margin: 50em 500em 300em 1em;');

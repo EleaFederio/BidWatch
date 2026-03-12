@@ -13,6 +13,7 @@ const ContractScheduleForm = ({contractData, setContractData, handleChange}) => 
         <Fragment>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.3/datepicker.min.js"></script>
 
+
         <label>Pre-Bid Conference Schedule</label>
         <div className="flex flex-col mb-3">
             <div className="relative">
@@ -22,12 +23,14 @@ const ContractScheduleForm = ({contractData, setContractData, handleChange}) => 
                     ...contractData,
                     pre_bid: date
                 }))}
-                dateFormat="yyyy-MM-dd hh:mm:ss"
+                dateFormat="yyyy-MM-dd hh:mm:ss aa"
                 showTimeInput
+                timeFormat="hh:mm aa"
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             />
             </div>
         </div>
+
 
         <label>Opening of Bids Schedule</label>
         <div className="flex flex-col mb-3">
@@ -38,8 +41,9 @@ const ContractScheduleForm = ({contractData, setContractData, handleChange}) => 
                     ...contractData,
                     opening_of_bids: date
                 }))}
-                dateFormat="yyyy-MM-dd hh:mm:ss"
+                dateFormat="yyyy-MM-dd hh:mm:ss aa"
                 showTimeInput
+                timeFormat="hh:mm aa"
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             />
             </div>

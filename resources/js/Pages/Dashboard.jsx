@@ -58,16 +58,31 @@ export default function Dashboard({ auth }) {
             'location' : contractData.contract_location,
             'description' : contractData.contract_details,
             'approved_budget' : contractData.contract_approved_budget,
-            'pre_bid' : moment(contractData.pre_bid).format('yyyy-MM-DD hh:mm:ss'),
-            'opening_of_bids' : moment(contractData.opening_of_bids).format('yyyy-MM-DD hh:mm:ss'),
-            'bulletin_posting' : moment(contractData.bulletin_posting).format('yyyy-MM-DD'),
-            'bulletin_removal' : moment(contractData.bulletin_removal).format('yyyy-MM-DD'),
+            // Use 24-hour format for DB
+            'pre_bid' : moment(contractData.pre_bid).format('YYYY-MM-DD HH:mm:ss'),
+            'opening_of_bids' : moment(contractData.opening_of_bids).format('YYYY-MM-DD HH:mm:ss'),
+            'bulletin_posting' : moment(contractData.bulletin_posting).format('YYYY-MM-DD'),
+            'bulletin_removal' : moment(contractData.bulletin_removal).format('YYYY-MM-DD'),
             'archieve' : false
         }
         axios.post('api/contracts', data)
             .then(res => {
                 console.log(res)
-                getContracts()
+                getContracts();
+                // Reset all forms and stepper
+                setContractData({
+                    contract_id : "23FL0000",
+                    contract_title : "",
+                    contract_location : "",
+                    contract_details : "",
+                    contract_approved_budget : 0.00,
+                    pre_bid : null,
+                    opening_of_bids : null,
+                    bulletin_posting : null,
+                    bulletin_removal: null,
+                    archieve : false
+                });
+                setPage(0); // Stepper to step 1
             })
             .catch(error => {
                 console.log(error)

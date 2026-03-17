@@ -7,6 +7,56 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
 
+// Custom Appointment component
+const CustomAppointment = ({ data, ...restProps }) => {
+    let backgroundColor = '';
+    const today = new Date();
+    const startDate = new Date(data.startDate);
+    if (
+        startDate.getFullYear() === today.getFullYear() &&
+        startDate.getMonth() === today.getMonth() &&
+        startDate.getDate() === today.getDate()
+    ) {
+        backgroundColor = '#2ecc40'; // green for today
+    } else if (data.title && data.title.includes('Pre-bid Conference')) {
+        backgroundColor = '#ff5003';
+    } else if (data.title && data.title.includes('Opening of Bids')) {
+        backgroundColor = '#003366';
+    }
+    return (
+        <Appointments.Appointment
+            {...restProps}
+            data={data}
+            style={{
+                ...restProps.style,
+                backgroundColor,
+                color: '#fff', // ensure text is readable
+            }}
+        />
+    );
+};
+
+// Custom Month Cell component
+const CustomMonthCell = ({ startDate, ...restProps }) => {
+    const today = new Date();
+    const cellDate = new Date(startDate);
+    const isToday = (
+        cellDate.getFullYear() === today.getFullYear() &&
+        cellDate.getMonth() === today.getMonth() &&
+        cellDate.getDate() === today.getDate()
+    );
+    return (
+        <MonthView.Cell
+            {...restProps}
+            startDate={startDate}
+            style={{
+                ...restProps.style,
+                backgroundColor: isToday ? '#2ecc40' : restProps.style?.backgroundColor,
+            }}
+        />
+    );
+};
+
 export default function Dashboard({ auth }) {
 
     const currentDate = '2023-06-07';
@@ -45,13 +95,13 @@ export default function Dashboard({ auth }) {
                             data={data}
                         >
                             <ViewState defaultCurrentDate={new Date()} />
-                            <MonthView />
+                            <MonthView cellComponent={CustomMonthCell} />
                             <DayView />
                             <Toolbar/>
                             <ViewSwitcher/>
                             <DateNavigator/>
                             <TodayButton/>
-                            <Appointments />
+                            <Appointments appointmentComponent={CustomAppointment} />
                         </Scheduler>
                     </Paper>
                 )

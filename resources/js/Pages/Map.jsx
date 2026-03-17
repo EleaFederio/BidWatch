@@ -4,15 +4,8 @@ import { Container } from "react-bootstrap"
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 import React from 'react'
 
-const containerStyle = {
-    width: '400px',
-    height: '400px'
-};
-
-const center = {
-    lat: -3.745,
-    lng: -38.523
-};
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
 
 
@@ -45,11 +38,25 @@ const Map = ({ auth }) => {
             <Head>
                 <title>Bid-Watch - Calendar</title>
             </Head>
-            <Container>
 
+            <Container fluid className="p-0" style={{height: 'calc(100vh - 80px)', minHeight: 400, display: 'flex', flexDirection: 'column'}}>
+                {/* Leaflet Map fills the container */}
+                <div style={{ flex: 1, minHeight: 0 }}>
+                    <MapContainer center={[12.9739, 124.0113]} zoom={13} style={{ height: '100%', width: '100%' }}>
+                        <TileLayer
+                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        />
+                        <Marker position={[12.9739, 124.0113]}>
+                            <Popup>
+                                Sorsogon, Philippines
+                            </Popup>
+                        </Marker>
+                    </MapContainer>
+                </div>
             </Container>
 
-            <h1>Map here...</h1>
+            
 
         </AuthenticatedLayout>
     )

@@ -32,6 +32,13 @@ export default function Authenticated({ user, header, children }) {
                                     Calendar
                                 </NavLink>
                             </div>
+
+                            <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                                <NavLink href={route('photos')} active={route().current('photos')}>
+                                    Photos
+                                </NavLink>
+                            </div>
+
                             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                                 <NavLink href={route('map')} active={route().current('map')}>
                                     Infra Map
@@ -114,6 +121,9 @@ export default function Authenticated({ user, header, children }) {
                             Dashboard
                         </ResponsiveNavLink>
                         <ResponsiveNavLink href={route('calendar')} active={route().current('calendar')}>
+                            Calendar
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink href={route('photos')} active={route().current('photos')}>
                             Calendar
                         </ResponsiveNavLink>
                         <ResponsiveNavLink href={route('map')} active={route().current('map')}>

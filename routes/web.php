@@ -42,6 +42,9 @@ Route::get('/map', function () {
 Route::get('/announcer', function () {
     return Inertia::render('Announcer');
 })->middleware(['auth', 'verified'])->name('announcer');
+Route::get('/contracts/{contractID}', [ContractController::class, 'details'])
+    ->middleware(['auth', 'verified'])
+    ->name('contracts.details');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

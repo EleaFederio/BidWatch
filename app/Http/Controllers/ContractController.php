@@ -83,6 +83,15 @@ class ContractController extends Controller
         ]);
     }
 
+    public function details($contractID)
+    {
+        $contract = Contract::where('contract_id', $contractID)->firstOrFail();
+
+        return Inertia::render('ContractDetails', [
+            'contract' => $contract,
+        ]);
+    }
+
     /**
      * Update the specified resource in storage.
      */

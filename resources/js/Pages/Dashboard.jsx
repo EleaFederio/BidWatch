@@ -4,7 +4,7 @@ import Stepper from '@/components/contracts/Stepper';
 import StepperControl from '@/components/contracts/StepperControl';
 import ContractDetailsForm from '@/components/contracts/steps/ContractDetailsForm';
 import ContractScheduleForm from '@/components/contracts/steps/ContractScheduleForm';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { Breadcrumbs, Card, CardBody, CardFooter, Typography } from '@material-tailwind/react';
 import { auto } from '@popperjs/core';
 import axios from 'axios';
@@ -154,7 +154,7 @@ export default function Dashboard({ auth }) {
                                     <p className="mb-3 font-normal text-gray-700 dark:text-gray-400"><small>Posting: {contract.bulletinboard_posting} to {contract.bulletinboard_removal}</small></p>
                                 </CardBody>
                                 <div className='mt-auto p-3'>
-                                    <Button>View Details</Button>
+                                    <Button as={Link} href={`/contracts/${contract.contract_id}`}>View Details</Button>
                                     <Button href={'contract/certification/' + contract.contract_id} size='sm' target='_blank' variant='link' style={{marginTop: auto}}>Certification</Button>
                                 </div>
                             </Card>

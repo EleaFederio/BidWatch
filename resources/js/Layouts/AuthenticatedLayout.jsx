@@ -3,14 +3,35 @@ import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 
 export default function Authenticated({ user, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+    const { url } = usePage();
+    const routeName = route().current();
+    const pageNames = {
+        dashboard: 'Dashboard',
+        calendar: 'Calendar',
+        photos: 'Photos',
+        map: 'Infra Map',
+        announcer: 'Announcer',
+        'contracts.details': 'Contract Details',
+        'profile.edit': 'Profile',
+        'settings.edit': 'Settings',
+    };
+
+    const breadcrumbItems = [{ label: 'Home', href: route('dashboard') }];
+
+    if (routeName && routeName !== 'dashboard') {
+        breadcrumbItems.push({
+            label: pageNames[routeName] || url.replace(/\//g, ' ').trim(),
+            href: url,
+        });
+    }
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <nav className="bg-white border-b border-gray-100">
+            <nav className="fixed inset-x-0 top-0 z-50 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         {/* Desktop View */}
@@ -124,12 +145,12 @@ export default function Authenticated({ user, header, children }) {
                             Calendar
                         </ResponsiveNavLink>
                         <ResponsiveNavLink href={route('photos')} active={route().current('photos')}>
-                            Calendar
+                            Photos
                         </ResponsiveNavLink>
                         <ResponsiveNavLink href={route('map')} active={route().current('map')}>
                             Infra Map
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink href={route('announcer')} active={route().current('map')}>
+                        <ResponsiveNavLink href={route('announcer')} active={route().current('announcer')}>
                             Announcer
                         </ResponsiveNavLink>
                     </div>
@@ -152,13 +173,37 @@ export default function Authenticated({ user, header, children }) {
                 </div>
             </nav>
 
-            {header && (
-                <header className="bg-white shadow">
-                    <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">{header}</div>
-                </header>
-            )}
+            <div className="pt-16">
+                {header && (
+                    <header className="bg-white shadow">
+                        <div className="max-w-7xl mx-auto flex flex-col gap-1 px-4 py-2 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+                            <div className="min-w-0 [&_h1]:text-base [&_h2]:text-base [&_h1]:leading-5 [&_h2]:leading-5">
+                                {header}
+                            </div>
+                            <nav aria-label="Breadcrumb" className="flex items-center text-xs text-gray-500 lg:justify-end">
+                                {breadcrumbItems.map((item, index) => {
+                                    const isLastItem = index === breadcrumbItems.length - 1;
 
-            <main>{children}</main>
+                                    return (
+                                        <div key={`${item.label}-${index}`} className="flex items-center">
+                                            {index > 0 && <span className="mx-2 text-gray-300">/</span>}
+                                            {isLastItem ? (
+                                                <span className="font-medium text-gray-700">{item.label}</span>
+                                            ) : (
+                                                <Link href={item.href} className="transition hover:text-gray-700">
+                                                    {item.label}
+                                                </Link>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </nav>
+                        </div>
+                    </header>
+                )}
+
+                <main>{children}</main>
+            </div>
         </div>
     );
 }

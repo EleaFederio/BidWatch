@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use \PDF;
 
@@ -25,7 +26,7 @@ class ContractController extends Controller
 
     public function index()
     {
-        $contracts = DB::table('contracts')->orderBy('id', 'DESC')->paginate(6);
+        $contracts = DB::table('contracts')->orderBy('id', 'DESC')->paginate(8);
         // return $contracts;
         return ContractsResource::collection($contracts);
     }
@@ -85,10 +86,47 @@ class ContractController extends Controller
 
     public function details($contractID)
     {
-        $contract = Contract::where('contract_id', $contractID)->firstOrFail();
+        $contract = Contract::with(['photos' => function ($query) {
+            $query->orderByDesc('photo_date')->orderByDesc('photo_time');
+        }])->where('contract_id', $contractID)->firstOrFail();
+
+        $contract->photos->transform(function ($photo) {
+            $path = $photo->file_path;
+
+            $photo->photo_url = Str::startsWith($path, ['http://', 'https://', '/'])
+                ? $path
+                : asset('storage/' . ltrim($path, '/'));
+
+            return $photo;
+        });
 
         return Inertia::render('ContractDetails', [
             'contract' => $contract,
+        ]);
+    }
+
+    public function photoManager()
+    {
+        $contracts = Contract::with(['photos' => function ($query) {
+            $query->orderByDesc('photo_date')->orderByDesc('photo_time');
+        }])->orderByDesc('id')->paginate(6)->withQueryString();
+
+        $contracts->getCollection()->transform(function ($contract) {
+            $contract->photos->transform(function ($photo) {
+                $path = $photo->file_path;
+
+                $photo->photo_url = Str::startsWith($path, ['http://', 'https://', '/'])
+                    ? $path
+                    : asset('storage/' . ltrim($path, '/'));
+
+                return $photo;
+            });
+
+            return $contract;
+        });
+
+        return Inertia::render('PhotoManager', [
+            'contracts' => $contracts,
         ]);
     }
 

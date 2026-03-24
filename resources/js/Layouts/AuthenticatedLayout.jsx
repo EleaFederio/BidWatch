@@ -13,6 +13,7 @@ export default function Authenticated({ user, header, children }) {
         dashboard: 'Dashboard',
         calendar: 'Calendar',
         photos: 'Photos',
+        kanban: 'Kanban',
         map: 'Infra Map',
         announcer: 'Announcer',
         'contracts.details': 'Contract Details',
@@ -57,6 +58,12 @@ export default function Authenticated({ user, header, children }) {
                             <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
                                 <NavLink href={route('photos')} active={route().current('photos')}>
                                     Photos
+                                </NavLink>
+                            </div>
+
+                            <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
+                                <NavLink href={route('kanban')} active={route().current('kanban')}>
+                                    Kanban
                                 </NavLink>
                             </div>
 
@@ -146,6 +153,9 @@ export default function Authenticated({ user, header, children }) {
                         </ResponsiveNavLink>
                         <ResponsiveNavLink href={route('photos')} active={route().current('photos')}>
                             Photos
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink href={route('kanban')} active={route().current('kanban')}>
+                            Kanban
                         </ResponsiveNavLink>
                         <ResponsiveNavLink href={route('map')} active={route().current('map')}>
                             Infra Map

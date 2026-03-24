@@ -51,6 +51,7 @@ export default function Dashboard({ auth }) {
 
     const [contracts, setContracts] = useState();
     const [apiUrl, setApiUrl] = useState('/api/contracts');
+    const [searchTerm, setSearchTerm] = useState('');
     const [viewMode, setViewMode] = useState('cards');
     const [contractData, setContractData] = useState({
         contract_id : "23FL0000",
@@ -158,6 +159,16 @@ export default function Dashboard({ auth }) {
         getContracts();
     }, [apiUrl]);
 
+    useEffect(() => {
+        const trimmedSearch = searchTerm.trim();
+        const timeoutId = setTimeout(() => {
+            const searchQuery = trimmedSearch ? `?search=${encodeURIComponent(trimmedSearch)}` : '';
+            setApiUrl(`/api/contracts${searchQuery}`);
+        }, 300);
+
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm]);
+
     const paginationItems = contracts?.meta
         ? buildPaginationItems(contracts.meta.current_page, contracts.meta.last_page)
         : [];
@@ -184,6 +195,24 @@ export default function Dashboard({ auth }) {
                             </div>
 
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                                    <label htmlFor="contract-search" className="sr-only">
+                                        Search contracts
+                                    </label>
+                                    <div className="flex items-center gap-3">
+                                        <svg viewBox="0 0 20 20" className="h-4 w-4 fill-current text-slate-400" aria-hidden="true">
+                                            <path fillRule="evenodd" d="M8.5 3a5.5 5.5 0 013.967 9.31l3.611 3.611a1 1 0 01-1.414 1.414l-3.611-3.611A5.5 5.5 0 118.5 3zm-3.5 5.5a3.5 3.5 0 117 0 3.5 3.5 0 01-7 0z" clipRule="evenodd" />
+                                        </svg>
+                                        <input
+                                            id="contract-search"
+                                            type="text"
+                                            value={searchTerm}
+                                            onChange={(event) => setSearchTerm(event.target.value)}
+                                            placeholder="Search title, contract ID, or location"
+                                            className="w-full min-w-[280px] border-0 bg-transparent p-0 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0"
+                                        />
+                                    </div>
+                                </div>
                                 <div className="rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
                                     <div className="flex items-center gap-1">
                                         {viewModes.map((mode) => (

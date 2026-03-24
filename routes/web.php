@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ContractController;
+use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use Illuminate\Foundation\Application;
@@ -33,15 +34,28 @@ Route::get('/dashboard', function () {
 Route::get('/calendar', function () {
     return Inertia::render('Calendar');
 })->middleware(['auth', 'verified'])->name('calendar');
-Route::get('/photos', function () {
-    return Inertia::render('PhotoManager');
-})->middleware(['auth', 'verified'])->name('photos');
+Route::get('/photos', [ContractController::class, 'photoManager'])->middleware(['auth', 'verified'])->name('photos');
+Route::get('/kanban', function () {
+    return Inertia::render('Kanban');
+})->middleware(['auth', 'verified'])->name('kanban');
 Route::get('/map', function () {
     return Inertia::render('Map');
 })->middleware(['auth', 'verified'])->name('map');
 Route::get('/announcer', function () {
     return Inertia::render('Announcer');
 })->middleware(['auth', 'verified'])->name('announcer');
+Route::get('/contracts/{contractID}', [ContractController::class, 'details'])
+    ->middleware(['auth', 'verified'])
+    ->name('contracts.details');
+Route::post('/contracts/{contract}/photos', [PhotoController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('contracts.photos.store');
+Route::post('/photos/{photo}', [PhotoController::class, 'update'])
+    ->middleware(['auth', 'verified'])
+    ->name('photos.update');
+Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])
+    ->middleware(['auth', 'verified'])
+    ->name('photos.destroy');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

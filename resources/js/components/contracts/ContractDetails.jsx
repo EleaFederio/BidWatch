@@ -561,13 +561,13 @@ export default function ContractDetails({ contract }) {
     return (
         <div className="container mx-auto max-w-4xl px-4">
             <Card className="shadow-lg">
-                <CardBody className="space-y-6">
-                    <div className="flex flex-col gap-4 border-b border-blue-gray-50 pb-6 md:flex-row md:items-start md:justify-between">
+                <CardBody className="space-y-4 p-5">
+                    <div className="flex flex-col gap-3 border-b border-blue-gray-50 pb-4 md:flex-row md:items-start md:justify-between">
                         <div>
                             <Typography variant="h3" color="blue-gray">
                                 {contract.title}
                             </Typography>
-                            <Typography variant="lead" className="mt-2 text-blue-gray-600">
+                            <Typography variant="lead" className="mt-1 text-blue-gray-600">
                                 {contract.contract_id}
                             </Typography>
                         </div>
@@ -578,62 +578,62 @@ export default function ContractDetails({ contract }) {
                         />
                     </div>
 
-                    <div className="grid gap-4 md:grid-cols-2">
-                        <div className="rounded-xl bg-blue-gray-50 p-4">
+                    <div className="grid gap-3 md:grid-cols-2">
+                        <div className="rounded-xl bg-blue-gray-50 p-3.5">
                             <Typography variant="small" className="font-semibold uppercase tracking-wide text-blue-gray-500">
                                 Location
                             </Typography>
-                            <Typography className="mt-2 text-base text-blue-gray-900">
+                            <Typography className="mt-1.5 text-sm text-blue-gray-900">
                                 {contract.location || 'No location provided'}
                             </Typography>
                         </div>
-                        <div className="rounded-xl bg-blue-gray-50 p-4">
+                        <div className="rounded-xl bg-blue-gray-50 p-3.5">
                             <Typography variant="small" className="font-semibold uppercase tracking-wide text-blue-gray-500">
                                 Approved Budget
                             </Typography>
-                            <Typography className="mt-2 text-base text-blue-gray-900">
+                            <Typography className="mt-1.5 text-sm text-blue-gray-900">
                                 {formatBudget(contract.approved_budget)}
                             </Typography>
                         </div>
-                        <div className="rounded-xl bg-blue-gray-50 p-4">
+                        <div className="rounded-xl bg-blue-gray-50 p-3.5">
                             <Typography variant="small" className="font-semibold uppercase tracking-wide text-blue-gray-500">
                                 Pre-Bid Conference
                             </Typography>
-                            <Typography className="mt-2 text-base text-blue-gray-900">
+                            <Typography className="mt-1.5 text-sm text-blue-gray-900">
                                 {formatSchedule(contract.pre_bid)}
                             </Typography>
                         </div>
-                        <div className="rounded-xl bg-blue-gray-50 p-4">
+                        <div className="rounded-xl bg-blue-gray-50 p-3.5">
                             <Typography variant="small" className="font-semibold uppercase tracking-wide text-blue-gray-500">
                                 Opening of Bids
                             </Typography>
-                            <Typography className="mt-2 text-base text-blue-gray-900">
+                            <Typography className="mt-1.5 text-sm text-blue-gray-900">
                                 {formatSchedule(contract.opening_of_bids)}
                             </Typography>
                         </div>
-                        <div className="rounded-xl bg-blue-gray-50 p-4">
+                        <div className="rounded-xl bg-blue-gray-50 p-3.5">
                             <Typography variant="small" className="font-semibold uppercase tracking-wide text-blue-gray-500">
                                 Bulletin Posting
                             </Typography>
-                            <Typography className="mt-2 text-base text-blue-gray-900">
+                            <Typography className="mt-1.5 text-sm text-blue-gray-900">
                                 {formatPostingDate(contract.bulletin_posting)}
                             </Typography>
                         </div>
-                        <div className="rounded-xl bg-blue-gray-50 p-4">
+                        <div className="rounded-xl bg-blue-gray-50 p-3.5">
                             <Typography variant="small" className="font-semibold uppercase tracking-wide text-blue-gray-500">
                                 Bulletin Removal
                             </Typography>
-                            <Typography className="mt-2 text-base text-blue-gray-900">
+                            <Typography className="mt-1.5 text-sm text-blue-gray-900">
                                 {formatPostingDate(contract.bulletin_removal)}
                             </Typography>
                         </div>
                     </div>
 
-                    <div className="rounded-xl border border-blue-gray-50 p-5">
+                    <div className="rounded-xl border border-blue-gray-50 p-4">
                         <Typography variant="small" className="font-semibold uppercase tracking-wide text-blue-gray-500">
                             Description
                         </Typography>
-                        <Typography className="mt-3 whitespace-pre-line text-base leading-7 text-blue-gray-900">
+                        <Typography className="mt-2 whitespace-pre-line text-sm leading-6 text-blue-gray-900">
                             {contract.description || 'No description provided'}
                         </Typography>
                     </div>

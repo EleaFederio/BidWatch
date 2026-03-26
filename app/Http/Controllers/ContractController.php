@@ -8,6 +8,7 @@ use App\Http\Resources\MonthlyContracts;
 use App\Http\Resources\MonthlyOpeningOfBidsCollection;
 use App\Http\Resources\MonthlyPreBidCollection;
 use App\Models\Contract;
+use App\Models\Photo;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -117,11 +118,27 @@ class ContractController extends Controller
         ]);
     }
 
-    public function photoManager()
+    public function photoManager(Request $request)
     {
-        $contracts = Contract::with(['photos' => function ($query) {
-            $query->orderByDesc('photo_date')->orderByDesc('photo_time');
-        }])->orderByDesc('id')->paginate(6)->withQueryString();
+        $sortBy = $request->query('sort_by', 'time');
+        $sortOrder = $request->query('sort_order', 'desc');
+
+        if (!in_array($sortBy, ['time', 'contract_id'], true)) {
+            $sortBy = 'time';
+        }
+
+        if (!in_array($sortOrder, ['asc', 'desc'], true)) {
+            $sortOrder = 'desc';
+        }
+
+        $contracts = Contract::query()
+            ->whereHas('photos')
+            ->with(['photos' => function ($query) {
+                $query->orderByDesc('photo_date')->orderByDesc('photo_time');
+            }])
+            ->orderByDesc('id')
+            ->paginate(6, ['*'], 'contracts_page')
+            ->withQueryString();
 
         $contracts->getCollection()->transform(function ($contract) {
             $contract->photos->transform(function ($photo) {
@@ -137,8 +154,80 @@ class ContractController extends Controller
             return $contract;
         });
 
+        $photosQuery = Photo::query()
+            ->select('photos.*')
+            ->with(['contract:id,contract_id,title'])
+            ->join('contracts', 'contracts.id', '=', 'photos.contract_id');
+
+        if ($sortBy === 'contract_id') {
+            $photosQuery
+                ->orderBy('contracts.contract_id', $sortOrder)
+                ->orderByDesc('photos.photo_date')
+                ->orderByDesc('photos.photo_time')
+                ->orderByDesc('photos.id');
+        } else {
+            $photosQuery
+                ->orderBy('photos.photo_date', $sortOrder)
+                ->orderBy('photos.photo_time', $sortOrder)
+                ->orderBy('photos.id', $sortOrder);
+        }
+
+        $photos = $photosQuery
+            ->paginate(6, ['photos.*'], 'photos_page')
+            ->withQueryString();
+
+        $photos->getCollection()->transform(function ($photo) {
+            $path = $photo->file_path;
+
+            $photo->photo_url = Str::startsWith($path, ['http://', 'https://', '/'])
+                ? $path
+                : asset('storage/' . ltrim($path, '/'));
+            $photo->contract_code = $photo->contract?->contract_id;
+            $photo->contract_title = $photo->contract?->title;
+
+            return $photo;
+        });
+
+        $allPhotosQuery = Photo::query()
+            ->select('photos.*')
+            ->with(['contract:id,contract_id,title'])
+            ->join('contracts', 'contracts.id', '=', 'photos.contract_id');
+
+        if ($sortBy === 'contract_id') {
+            $allPhotosQuery
+                ->orderBy('contracts.contract_id', $sortOrder)
+                ->orderByDesc('photos.photo_date')
+                ->orderByDesc('photos.photo_time')
+                ->orderByDesc('photos.id');
+        } else {
+            $allPhotosQuery
+                ->orderBy('photos.photo_date', $sortOrder)
+                ->orderBy('photos.photo_time', $sortOrder)
+                ->orderBy('photos.id', $sortOrder);
+        }
+
+        $allPhotos = $allPhotosQuery->get();
+
+        $allPhotos->transform(function ($photo) {
+            $path = $photo->file_path;
+
+            $photo->photo_url = Str::startsWith($path, ['http://', 'https://', '/'])
+                ? $path
+                : asset('storage/' . ltrim($path, '/'));
+            $photo->contract_code = $photo->contract?->contract_id;
+            $photo->contract_title = $photo->contract?->title;
+
+            return $photo;
+        });
+
         return Inertia::render('PhotoManager', [
             'contracts' => $contracts,
+            'photos' => $photos,
+            'allPhotos' => $allPhotos,
+            'photoFilters' => [
+                'sort_by' => $sortBy,
+                'sort_order' => $sortOrder,
+            ],
         ]);
     }
 

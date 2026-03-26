@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ContractController;
+use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
@@ -35,9 +36,12 @@ Route::get('/calendar', function () {
     return Inertia::render('Calendar');
 })->middleware(['auth', 'verified'])->name('calendar');
 Route::get('/photos', [ContractController::class, 'photoManager'])->middleware(['auth', 'verified'])->name('photos');
-Route::get('/kanban', function () {
-    return Inertia::render('Kanban');
-})->middleware(['auth', 'verified'])->name('kanban');
+Route::get('/kanban', [KanbanController::class, 'index'])->middleware(['auth', 'verified'])->name('kanban');
+Route::post('/kanban/cards', [KanbanController::class, 'storeCard'])->middleware(['auth', 'verified'])->name('kanban.cards.store');
+Route::post('/kanban/columns', [KanbanController::class, 'storeColumn'])->middleware(['auth', 'verified'])->name('kanban.columns.store');
+Route::patch('/kanban/columns/{column}', [KanbanController::class, 'updateColumn'])->middleware(['auth', 'verified'])->name('kanban.columns.update');
+Route::patch('/kanban/cards/{card}', [KanbanController::class, 'moveCard'])->middleware(['auth', 'verified'])->name('kanban.cards.move');
+Route::delete('/kanban/columns/{column}', [KanbanController::class, 'destroyColumn'])->middleware(['auth', 'verified'])->name('kanban.columns.destroy');
 Route::get('/map', function () {
     return Inertia::render('Map');
 })->middleware(['auth', 'verified'])->name('map');

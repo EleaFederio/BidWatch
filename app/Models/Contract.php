@@ -18,4 +18,9 @@ class Contract extends Model
     {
         return $this->hasMany(Photo::class);
     }
+
+    public function kanbanCards(): HasMany
+    {
+        return $this->hasMany(KanbanCard::class);
+    }
 }

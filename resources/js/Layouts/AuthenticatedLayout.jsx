@@ -31,15 +31,15 @@ export default function Authenticated({ user, header, children }) {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <nav className="fixed inset-x-0 top-0 z-50 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur">
+        <div className="site-shell min-h-screen">
+            <nav className="site-nav fixed inset-x-0 top-0 z-[1100] border-b backdrop-blur">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         {/* Desktop View */}
                         <div className="flex">
                             <div className="shrink-0 flex items-center">
                                 <Link href="/">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
+                                    <ApplicationLogo className="block h-9 w-auto fill-current text-white" />
                                 </Link>
                             </div>
 
@@ -86,7 +86,7 @@ export default function Authenticated({ user, header, children }) {
                                         <span className="inline-flex rounded-md">
                                             <button
                                                 type="button"
-                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
+                                                className="inline-flex items-center rounded-md border border-white/10 bg-white/8 px-3 py-2 text-sm font-medium leading-4 text-white/84 transition ease-in-out duration-150 hover:bg-white/14 hover:text-white focus:outline-none"
                                             >
                                                 {user.name}
 
@@ -120,7 +120,7 @@ export default function Authenticated({ user, header, children }) {
                         <div className="-mr-2 flex items-center sm:hidden">
                             <button
                                 onClick={() => setShowingNavigationDropdown((previousState) => !previousState)}
-                                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out"
+                                className="inline-flex items-center justify-center rounded-md p-2 text-white/72 transition duration-150 ease-in-out hover:bg-white/10 hover:text-white focus:outline-none focus:bg-white/10 focus:text-white"
                             >
                                 <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                     <path
@@ -166,10 +166,10 @@ export default function Authenticated({ user, header, children }) {
                     </div>
 
                     {/* Mobile Responsive View */}
-                    <div className="pt-4 pb-1 border-t border-gray-200">
+                    <div className="border-t border-white/10 pt-4 pb-1">
                         <div className="px-4">
-                            <div className="font-medium text-base text-gray-800">{user.name}</div>
-                            <div className="font-medium text-sm text-gray-500">{user.email}</div>
+                            <div className="text-base font-medium text-white">{user.name}</div>
+                            <div className="text-sm font-medium text-white/72">{user.email}</div>
                         </div>
 
                         <div className="mt-3 space-y-1">
@@ -183,24 +183,24 @@ export default function Authenticated({ user, header, children }) {
                 </div>
             </nav>
 
-            <div className="pt-16">
+            <div className={header ? 'pt-28' : 'pt-16'}>
                 {header && (
-                    <header className="bg-white shadow">
+                    <header className="site-header fixed inset-x-0 top-16 z-[1000] shadow-sm">
                         <div className="max-w-7xl mx-auto flex flex-col gap-1 px-4 py-2 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-                            <div className="min-w-0 [&_h1]:text-base [&_h2]:text-base [&_h1]:leading-5 [&_h2]:leading-5">
+                            <div className="min-w-0 text-[#002347] [&_h1]:text-base [&_h2]:text-base [&_h1]:leading-5 [&_h2]:leading-5">
                                 {header}
                             </div>
-                            <nav aria-label="Breadcrumb" className="flex items-center text-xs text-gray-500 lg:justify-end">
+                            <nav aria-label="Breadcrumb" className="flex items-center text-xs text-[#575757] lg:justify-end">
                                 {breadcrumbItems.map((item, index) => {
                                     const isLastItem = index === breadcrumbItems.length - 1;
 
                                     return (
                                         <div key={`${item.label}-${index}`} className="flex items-center">
-                                            {index > 0 && <span className="mx-2 text-gray-300">/</span>}
+                                            {index > 0 && <span className="mx-2 text-[#cacaca]">/</span>}
                                             {isLastItem ? (
-                                                <span className="font-medium text-gray-700">{item.label}</span>
+                                                <span className="font-medium text-[#003366]">{item.label}</span>
                                             ) : (
-                                                <Link href={item.href} className="transition hover:text-gray-700">
+                                                <Link href={item.href} className="transition hover:text-[#003f7d]">
                                                     {item.label}
                                                 </Link>
                                             )}

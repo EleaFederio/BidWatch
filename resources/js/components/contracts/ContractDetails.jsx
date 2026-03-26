@@ -1,4 +1,7 @@
 import Modal from '@/components/Modal';
+import ContractDetailsAddPhotoModal from '@/components/contracts/ContractDetailsAddPhotoModal';
+import ContractDetailsManageProjectPhotoModal from '@/components/contracts/ContractDetailsManageProjectPhotoModal';
+import ProjectPhotoPreview from '@/components/photos/ProjectPhotoPreview';
 import { Link } from '@inertiajs/react';
 import { Card, CardBody, Chip, Typography } from '@material-tailwind/react';
 import axios from 'axios';
@@ -272,6 +275,7 @@ export default function ContractDetails({ contract }) {
     const [status, setStatus] = useState('');
     const [errors, setErrors] = useState({});
     const [isSaving, setIsSaving] = useState(false);
+    const [previewPhotoIndex, setPreviewPhotoIndex] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showManageModal, setShowManageModal] = useState(false);
     const [selectedPhotoIds, setSelectedPhotoIds] = useState([]);
@@ -288,6 +292,7 @@ export default function ContractDetails({ contract }) {
     });
 
     const sortedPhotos = [...photos].sort((left, right) => `${right.photo_date} ${right.photo_time}`.localeCompare(`${left.photo_date} ${left.photo_time}`));
+    const previewPhoto = previewPhotoIndex !== null ? sortedPhotos[previewPhotoIndex] ?? null : null;
 
     const resetNewPhotoForm = () => {
         setNewPhotoForm({
@@ -441,6 +446,33 @@ export default function ContractDetails({ contract }) {
         }
     };
 
+    const handleDownloadSelectedPhotos = async () => {
+        if (selectedPhotoIds.length === 0) {
+            return;
+        }
+
+        const selectedPhotos = sortedPhotos.filter((photo) => selectedPhotoIds.includes(photo.id));
+
+        for (const photo of selectedPhotos) {
+            try {
+                const response = await fetch(photo.photo_url);
+                const blob = await response.blob();
+                const objectUrl = window.URL.createObjectURL(blob);
+                const extension = blob.type?.split('/')[1] || photo.photo_url.split('.').pop() || 'jpg';
+                const fileName = `${contract.contract_id}-${photo.photo_date || 'photo'}-${photo.id}.${extension}`;
+                const link = document.createElement('a');
+                link.href = objectUrl;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(objectUrl);
+            } catch (error) {
+                window.open(photo.photo_url, '_blank', 'noopener,noreferrer');
+            }
+        }
+    };
+
     const handlePhotoDoubleClick = (photoId) => {
         setReplaceTargetPhotoId(photoId);
         replaceInputRef.current?.click();
@@ -501,6 +533,30 @@ export default function ContractDetails({ contract }) {
     const renderError = (field) => errors[field] ? (
         <p className="mt-1 text-sm text-red-600">{errors[field][0]}</p>
     ) : null;
+
+    const closePreviewModal = () => {
+        setPreviewPhotoIndex(null);
+    };
+
+    const showPreviousPreviewPhoto = () => {
+        setPreviewPhotoIndex((current) => {
+            if (current === null || sortedPhotos.length === 0) {
+                return current;
+            }
+
+            return current === 0 ? sortedPhotos.length - 1 : current - 1;
+        });
+    };
+
+    const showNextPreviewPhoto = () => {
+        setPreviewPhotoIndex((current) => {
+            if (current === null || sortedPhotos.length === 0) {
+                return current;
+            }
+
+            return current === sortedPhotos.length - 1 ? 0 : current + 1;
+        });
+    };
 
     return (
         <div className="container mx-auto max-w-4xl px-4">
@@ -630,11 +686,16 @@ export default function ContractDetails({ contract }) {
                         {photos.length > 0 && (
                             <div className="mt-5 grid gap-4 md:grid-cols-3">
                                 {sortedPhotos.slice(0, 3).map((photo) => (
-                                    <div key={photo.id} className="overflow-hidden rounded-xl border border-blue-gray-100 bg-blue-gray-50">
+                                    <button
+                                        key={photo.id}
+                                        type="button"
+                                        onClick={() => setPreviewPhotoIndex(sortedPhotos.findIndex((item) => item.id === photo.id))}
+                                        className="overflow-hidden rounded-xl border border-blue-gray-100 bg-blue-gray-50 text-left transition hover:-translate-y-0.5 hover:shadow-md"
+                                    >
                                         <img
                                             src={photo.photo_url}
                                             alt={`${contract.contract_id} project photo`}
-                                            className="h-40 w-full object-cover"
+                                            className="h-40 w-full cursor-zoom-in object-cover"
                                         />
                                         <div className="space-y-1 p-3">
                                             <Typography className="text-sm font-semibold text-blue-gray-900">
@@ -644,7 +705,7 @@ export default function ContractDetails({ contract }) {
                                                 {formatPhotoTime(photo.photo_time)}
                                             </Typography>
                                         </div>
-                                    </div>
+                                    </button>
                                 ))}
                             </div>
                         )}
@@ -669,177 +730,47 @@ export default function ContractDetails({ contract }) {
                 </CardBody>
             </Card>
 
-            <Modal show={showAddModal} maxWidth="lg" onClose={closeAddModal}>
-                <div className="flex max-h-[85vh] flex-col">
-                    <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-                        <h3 className="text-lg font-semibold text-gray-900">Add Project Photos</h3>
-                        <button type="button" onClick={closeAddModal} className="text-sm text-gray-500 hover:text-gray-700">
-                            Close
-                        </button>
-                    </div>
+            <ContractDetailsAddPhotoModal
+                show={showAddModal}
+                onClose={closeAddModal}
+                onSubmit={handleAddPhotos}
+                onChange={handleNewPhotoChange}
+                form={newPhotoForm}
+                isSaving={isSaving}
+                renderError={renderError}
+                maxPhotoSizeLabel={MAX_PHOTO_SIZE_LABEL}
+            />
 
-                    <div className="flex flex-1 flex-col overflow-hidden">
-                        <form
-                            id="add-project-photos-form"
-                            onSubmit={handleAddPhotos}
-                            className="flex-1 overflow-y-auto px-6 py-5"
-                        >
-                            <div className="grid gap-4 md:grid-cols-2">
-                                <div className="md:col-span-2">
-                                    <label className="mb-2 block text-sm font-medium text-gray-800">Upload Photo Files</label>
-                                    <input
-                                        type="file"
-                                        name="photos"
-                                        accept="image/*"
-                                        multiple
-                                        onChange={handleNewPhotoChange}
-                                        className="block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900"
-                                    />
-                                    <p className="mt-2 text-xs text-gray-500">
-                                        Date, time, and GPS fields auto-fill from the first selected photo when metadata is available. Maximum file size: {MAX_PHOTO_SIZE_LABEL} per photo.
-                                    </p>
-                                    {renderError('photos')}
-                                    {renderError('photos.0')}
-                                </div>
-                                <div>
-                                    <label className="mb-2 block text-sm font-medium text-gray-800">Date</label>
-                                    <input type="date" name="photo_date" value={newPhotoForm.photo_date} onChange={handleNewPhotoChange} className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm" />
-                                    {renderError('photo_date')}
-                                </div>
-                                <div>
-                                    <label className="mb-2 block text-sm font-medium text-gray-800">Time</label>
-                                    <input type="time" name="photo_time" value={newPhotoForm.photo_time} onChange={handleNewPhotoChange} className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm" />
-                                    {renderError('photo_time')}
-                                </div>
-                                <div>
-                                    <label className="mb-2 block text-sm font-medium text-gray-800">Location</label>
-                                    <input type="text" name="location" value={newPhotoForm.location} onChange={handleNewPhotoChange} className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm" placeholder="Optional location" />
-                                    {renderError('location')}
-                                </div>
-                                <div>
-                                    <label className="mb-2 block text-sm font-medium text-gray-800">Longitude</label>
-                                    <input type="number" step="0.0000001" name="longitude" value={newPhotoForm.longitude} onChange={handleNewPhotoChange} className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm" placeholder="Optional longitude" />
-                                    {renderError('longitude')}
-                                </div>
-                                <div>
-                                    <label className="mb-2 block text-sm font-medium text-gray-800">Latitude</label>
-                                    <input type="number" step="0.0000001" name="latitude" value={newPhotoForm.latitude} onChange={handleNewPhotoChange} className="block w-full rounded-lg border border-gray-300 p-2.5 text-sm" placeholder="Optional latitude" />
-                                    {renderError('latitude')}
-                                </div>
-                            </div>
-                        </form>
-                        <div className="flex items-center justify-end gap-3 border-t border-gray-100 bg-white px-6 py-4">
-                            <button
-                                type="button"
-                                onClick={closeAddModal}
-                                className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                form="add-project-photos-form"
-                                disabled={isSaving}
-                                className="inline-flex min-w-[150px] items-center justify-center rounded-lg bg-blue-gray-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                                {isSaving ? 'Saving...' : 'Submit'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </Modal>
+            <ContractDetailsManageProjectPhotoModal
+                show={showManageModal}
+                onClose={closeManageModal}
+                onDeleteSelected={handleDeleteSelectedPhotos}
+                onDownloadSelected={handleDownloadSelectedPhotos}
+                selectedPhotoIds={selectedPhotoIds}
+                isSaving={isSaving}
+                replaceInputRef={replaceInputRef}
+                onReplacePhoto={handleReplacePhoto}
+                sortedPhotos={sortedPhotos}
+                togglePhotoSelection={togglePhotoSelection}
+                handlePhotoDoubleClick={handlePhotoDoubleClick}
+                contract={contract}
+                formatPostingDate={formatPostingDate}
+                formatPhotoTime={formatPhotoTime}
+            />
 
-            <Modal show={showManageModal} maxWidth="2xl" onClose={closeManageModal}>
-                <div className="p-6">
-                    <div className="flex flex-col gap-3 border-b border-gray-100 pb-4 md:flex-row md:items-center md:justify-between">
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-900">Manage Project Photos</h3>
-                            <p className="mt-1 text-sm text-gray-500">
-                                Click a photo to select it. Double-click a photo to replace its image.
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button
-                                type="button"
-                                onClick={handleDeleteSelectedPhotos}
-                                disabled={selectedPhotoIds.length === 0 || isSaving}
-                                className="rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
-                            >
-                                Delete Selected
-                            </button>
-                            <button type="button" onClick={closeManageModal} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700">
-                                Close
-                            </button>
-                        </div>
-                    </div>
-
-                    <input
-                        ref={replaceInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleReplacePhoto}
-                        className="hidden"
-                    />
-
-                    <div className="mt-5">
-                        {sortedPhotos.length === 0 ? (
-                            <div className="rounded-xl bg-gray-50 p-5 text-sm text-gray-500">
-                                No photos linked to this project yet.
-                            </div>
-                        ) : (
-                            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                                {sortedPhotos.map((photo) => {
-                                    const isSelected = selectedPhotoIds.includes(photo.id);
-
-                                    return (
-                                        <button
-                                            key={photo.id}
-                                            type="button"
-                                            onClick={() => togglePhotoSelection(photo.id)}
-                                            onDoubleClick={() => handlePhotoDoubleClick(photo.id)}
-                                            className={`overflow-hidden rounded-xl border text-left transition ${
-                                                isSelected
-                                                    ? 'border-blue-500 ring-2 ring-blue-200'
-                                                    : 'border-gray-200 hover:border-blue-gray-200'
-                                            }`}
-                                        >
-                                            <div className="relative">
-                                                <img
-                                                    src={photo.photo_url}
-                                                    alt={`${contract.contract_id} project photo`}
-                                                    className="h-48 w-full object-cover"
-                                                />
-                                                <span className={`absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full ${
-                                                    isSelected ? 'bg-blue-600 text-white' : 'bg-white/90 text-gray-500'
-                                                }`}>
-                                                    {isSelected && (
-                                                        <svg viewBox="0 0 20 20" className="h-4 w-4 fill-current">
-                                                            <path d="M16.704 5.29a1 1 0 010 1.415l-7.03 7.03a1 1 0 01-1.414 0L4.296 9.77a1 1 0 111.414-1.414l3.257 3.257 6.323-6.323a1 1 0 011.414 0z" />
-                                                        </svg>
-                                                    )}
-                                                </span>
-                                            </div>
-                                            <div className="space-y-1 bg-white p-4">
-                                                <p className="text-sm font-semibold text-gray-900">
-                                                    {formatPostingDate(photo.photo_date)} at {formatPhotoTime(photo.photo_time)}
-                                                </p>
-                                                <p className="text-sm text-gray-600">
-                                                    {photo.location || 'Location not provided'}
-                                                </p>
-                                                {(photo.latitude || photo.longitude) && (
-                                                    <p className="text-xs text-gray-500">
-                                                        {photo.latitude || '---'}, {photo.longitude || '---'}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </Modal>
+            <ProjectPhotoPreview
+                show={Boolean(previewPhoto)}
+                onClose={closePreviewModal}
+                previewPhoto={previewPhoto}
+                previewPhotoIndex={previewPhotoIndex}
+                sortedPhotos={sortedPhotos}
+                showPreviousPreviewPhoto={showPreviousPreviewPhoto}
+                showNextPreviewPhoto={showNextPreviewPhoto}
+                contractId={contract.contract_id}
+                contractTitle={contract.title}
+                formatPostingDate={formatPostingDate}
+                formatPhotoTime={formatPhotoTime}
+            />
         </div>
     );
 }

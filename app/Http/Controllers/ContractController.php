@@ -24,9 +24,21 @@ class ContractController extends Controller
      * Display a listing of the resource.
      */
 
-    public function index()
+    public function index(Request $request)
     {
-        $contracts = DB::table('contracts')->orderBy('id', 'DESC')->paginate(8);
+        $search = trim((string) $request->query('search', ''));
+
+        $contracts = DB::table('contracts')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($innerQuery) use ($search) {
+                    $innerQuery->where('title', 'like', '%' . $search . '%')
+                        ->orWhere('contract_id', 'like', '%' . $search . '%')
+                        ->orWhere('location', 'like', '%' . $search . '%');
+                });
+            })
+            ->orderBy('id', 'DESC')
+            ->paginate(8)
+            ->withQueryString();
         // return $contracts;
         return ContractsResource::collection($contracts);
     }

@@ -17,6 +17,7 @@ class MonthlyOpeningOfBidsCollection extends JsonResource
     public function toArray(Request $request): array
     {
         return[
+            'contract_id' => $this->contract_id,
             'title' => $this->contract_id . ' - Opening of Bids',
             'startDate' => $this->opening_of_bids,
             'endDate' => Carbon::create($this->opening_of_bids)->addMinutes(30),

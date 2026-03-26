@@ -17,6 +17,7 @@ class MonthlyPreBidCollection extends JsonResource
     public function toArray(Request $request): array
     {
         return[
+            'contract_id' => $this->contract_id,
             'title' => $this->contract_id . ' - Pre-bid Conference',
             'startDate' => $this->pre_bid,
             'endDate' => Carbon::create($this->pre_bid)->addMinutes(30),

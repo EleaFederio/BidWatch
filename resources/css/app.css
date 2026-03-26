@@ -1,3 +1,100 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+    --bw-navy-900: #002347;
+    --bw-navy-800: #003366;
+    --bw-blue-700: #003f7d;
+    --bw-orange-500: #ff5003;
+    --bw-orange-400: #fd7702;
+    --bw-amber-400: #ff8e00;
+    --bw-gray-900: #181818;
+    --bw-gray-800: #323232;
+    --bw-gray-700: #414141;
+    --bw-gray-600: #575757;
+    --bw-gray-400: #909090;
+    --bw-gray-200: #cacaca;
+    --bw-surface: #f6f6f4;
+}
+
+html,
+body,
+#app {
+    min-height: 100%;
+}
+
+body {
+    background:
+        radial-gradient(circle at top left, rgba(0, 63, 125, 0.24), transparent 32%),
+        radial-gradient(circle at top right, rgba(253, 119, 2, 0.16), transparent 26%),
+        linear-gradient(180deg, #f6f6f4 0%, #eceeed 100%);
+    color: var(--bw-gray-900);
+}
+
+::selection {
+    background: rgba(253, 119, 2, 0.25);
+    color: var(--bw-navy-900);
+}
+
+.site-shell {
+    background:
+        radial-gradient(circle at top left, rgba(0, 63, 125, 0.18), transparent 28%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(246, 246, 244, 0.92) 100%);
+}
+
+.site-nav {
+    background: linear-gradient(90deg, rgba(0, 35, 71, 0.96) 0%, rgba(0, 51, 102, 0.94) 56%, rgba(0, 63, 125, 0.92) 100%);
+    border-color: rgba(202, 202, 202, 0.24);
+    box-shadow: 0 18px 40px rgba(0, 35, 71, 0.22);
+}
+
+.site-header {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(246, 246, 244, 0.9) 100%);
+    border-bottom: 1px solid rgba(0, 35, 71, 0.08);
+}
+
+.site-panel {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(246, 246, 244, 0.96) 100%);
+    border: 1px solid rgba(0, 35, 71, 0.08);
+    box-shadow: 0 18px 45px rgba(0, 35, 71, 0.08);
+}
+
+.calendar-scheduler .MuiPaper-root {
+    overflow: hidden;
+}
+
+.calendar-scheduler .MuiTableCell-head {
+    background: linear-gradient(180deg, rgba(0, 35, 71, 0.04) 0%, rgba(0, 35, 71, 0.01) 100%);
+}
+
+.calendar-scheduler .MuiButtonBase-root,
+.calendar-scheduler .MuiTypography-root,
+.calendar-scheduler .MuiToolbar-root {
+    font-family: inherit;
+}
+
+.calendar-scheduler .MuiButtonBase-root {
+    border-radius: 12px;
+}
+
+.calendar-scheduler .MuiButtonBase-root.Mui-selected {
+    background: rgba(0, 63, 125, 0.12);
+    color: var(--bw-navy-800);
+}
+
+.calendar-scheduler .MuiToolbar-root {
+    border-bottom: 1px solid rgba(0, 35, 71, 0.08);
+}
+
+.calendar-scheduler .MuiTableCell-root {
+    border-color: rgba(0, 35, 71, 0.08);
+}
+
+.leaflet-container,
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom,
+.leaflet-control {
+    z-index: 1 !important;
+}

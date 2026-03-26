@@ -1,8 +1,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from "@inertiajs/react"
-import { Container } from "react-bootstrap"
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -30,6 +29,18 @@ const Map = ({ auth }) => {
         setMap(null)
     }, [])
 
+    useEffect(() => {
+        if (!map) {
+            return;
+        }
+
+        const timeoutId = window.setTimeout(() => {
+            map.invalidateSize();
+        }, 100);
+
+        return () => window.clearTimeout(timeoutId);
+    }, [map]);
+
     return(
         <AuthenticatedLayout
             user={auth.user}
@@ -39,10 +50,14 @@ const Map = ({ auth }) => {
                 <title>Bid-Watch - Calendar</title>
             </Head>
 
-            <Container fluid className="p-0" style={{height: 'calc(100vh - 80px)', minHeight: 400, display: 'flex', flexDirection: 'column'}}>
-                {/* Leaflet Map fills the container */}
-                <div style={{ flex: 1, minHeight: 0 }}>
-                    <MapContainer center={[12.9739, 124.0113]} zoom={13} style={{ height: '100%', width: '100%' }}>
+            <div className="w-full px-0" style={{ height: 'calc(100vh - 7rem)', minHeight: 400 }}>
+                <div style={{ height: '100%', width: '100%' }}>
+                    <MapContainer
+                        center={[12.9739, 124.0113]}
+                        zoom={13}
+                        style={{ height: '100%', width: '100%' }}
+                        whenCreated={setMap}
+                    >
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -54,7 +69,7 @@ const Map = ({ auth }) => {
                         </Marker>
                     </MapContainer>
                 </div>
-            </Container>
+            </div>
 
             
 

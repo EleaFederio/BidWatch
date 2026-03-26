@@ -1,87 +1,107 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button, Col, FormSelect } from "react-bootstrap";
 import introTrack from '../../sounds/announcement_sounds/Intro.wav';
 import outroTrack from '../../sounds/announcement_sounds/Outro.wav';
+
+const pickDefaultVoice = (voices) => (
+  voices.find((availableVoice) => availableVoice.name === 'Microsoft Rosa Online (Natural) - Filipino (Philippines)') ||
+  voices.find((availableVoice) => availableVoice.name.includes('Rosa') && availableVoice.name.includes('Philippines')) ||
+  voices.find((availableVoice) => availableVoice.lang === 'fil-PH') ||
+  voices.find((availableVoice) => availableVoice.lang === 'en-PH') ||
+  voices[0] ||
+  null
+);
 
 const TextToSpeech = ({ text }) => {
   const [isPaused, setIsPaused] = useState(false);
   const [utterance, setUtterance] = useState(null);
   const [voice, setVoice] = useState(null);
-  const intro = new Audio(introTrack);
-  const outro = new Audio(outroTrack);
+  const [voices, setVoices] = useState([]);
+  const intro = useMemo(() => new Audio(introTrack), []);
+  const outro = useMemo(() => new Audio(outroTrack), []);
 
   useEffect(() => {
     const synth = window.speechSynthesis;
-    const u = new SpeechSynthesisUtterance(text);
-    const voices = synth.getVoices();
+    const loadVoices = () => {
+      const availableVoices = synth.getVoices();
+      setVoices(availableVoices);
+      setVoice((currentVoice) => currentVoice || pickDefaultVoice(availableVoices));
+    };
 
-    setUtterance(u);
-    setVoice(voices[102]);
+    loadVoices();
+    synth.addEventListener('voiceschanged', loadVoices);
+
+    return () => {
+      synth.removeEventListener('voiceschanged', loadVoices);
+    };
+  }, []);
+
+  useEffect(() => {
+    const synth = window.speechSynthesis;
+    const speechUtterance = new SpeechSynthesisUtterance(text);
+    speechUtterance.voice = voice;
+    setUtterance(speechUtterance);
 
     return () => {
       synth.cancel();
     };
-  }, [text]);
+  }, [text, voice]);
 
   const handlePlay = () => {
     const synth = window.speechSynthesis;
 
-    if (isPaused) {
-      synth.resume();
-    }else{
-        utterance.voice = voice;
-    }
-    intro.volume = 0.3;
-    intro.play();
-    utterance.onend = function(event){
-      outro.volume = 0.3;
-      outro.play();
-    }
-    intro.onended = () => {
-      synth.speak(utterance);
+    if (!utterance) {
+      return;
     }
 
+    if (isPaused) {
+      synth.resume();
+    } else {
+      utterance.voice = voice;
+      intro.volume = 0.3;
+      outro.volume = 0.3;
+      intro.play();
+      utterance.onend = () => {
+        outro.play();
+      };
+      intro.onended = () => {
+        synth.speak(utterance);
+      };
+    }
 
     setIsPaused(false);
   };
 
   const handlePause = () => {
-    const synth = window.speechSynthesis;
-
-    synth.pause();
-
+    window.speechSynthesis.pause();
     setIsPaused(true);
   };
 
   const handleStop = () => {
-    const synth = window.speechSynthesis;
-
-    synth.cancel();
-
+    window.speechSynthesis.cancel();
     setIsPaused(false);
   };
 
   const handleVoiceChange = (event) => {
-    const voices = window.speechSynthesis.getVoices();
-    setVoice(voices.find((v) => v.name === event.target.value));
+    setVoice(voices.find((availableVoice) => availableVoice.name === event.target.value) || null);
   };
 
   return (
     <div>
-        <Col className="mt-3">
-            <FormSelect value={voice?.name} onChange={handleVoiceChange}>
-            {window.speechSynthesis.getVoices().map((voice) => (
-                <option key={voice.name} value={voice.name}>
-                {voice.name}
-                </option>
-            ))}
-            </FormSelect>
-        </Col>
-        <Col className="mt-3">
-            <Button size="lg" onClick={handlePlay}>{isPaused ? "Resume" : "Announce"}</Button>
-            <Button size="lg" variant="info" onClick={handlePause}>Pause</Button>
-            <Button size="lg" variant="danger" onClick={handleStop}>Stop</Button>
-        </Col>
+      <Col className="mt-3">
+        <FormSelect value={voice?.name || ''} onChange={handleVoiceChange}>
+          {voices.map((availableVoice) => (
+            <option key={`${availableVoice.name}-${availableVoice.lang}`} value={availableVoice.name}>
+              {availableVoice.name}
+            </option>
+          ))}
+        </FormSelect>
+      </Col>
+      <Col className="mt-3">
+        <Button size="lg" onClick={handlePlay}>{isPaused ? "Resume" : "Announce"}</Button>
+        <Button size="lg" variant="info" onClick={handlePause}>Pause</Button>
+        <Button size="lg" variant="danger" onClick={handleStop}>Stop</Button>
+      </Col>
     </div>
   );
 };

@@ -1,15 +1,23 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { ViewState } from '@devexpress/dx-react-scheduler';
 import { Appointments, DateNavigator, DayView, MonthView, Scheduler, TodayButton, Toolbar, ViewSwitcher } from '@devexpress/dx-react-scheduler-material-ui';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { Paper } from '@mui/material';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { Container } from 'react-bootstrap';
+
+const isContractSchedule = (appointment) =>
+    appointment?.contract_id &&
+    appointment?.title &&
+    (
+        appointment.title.includes('Pre-bid Conference') ||
+        appointment.title.includes('Opening of Bids')
+    );
 
 // Custom Appointment component
 const CustomAppointment = ({ data, ...restProps }) => {
     let backgroundColor = '';
+    const clickable = isContractSchedule(data);
     const today = new Date();
     const startDate = new Date(data.startDate);
     if (
@@ -27,10 +35,12 @@ const CustomAppointment = ({ data, ...restProps }) => {
         <Appointments.Appointment
             {...restProps}
             data={data}
+            onClick={clickable ? () => router.visit(`/contracts/${data.contract_id}`) : restProps.onClick}
             style={{
                 ...restProps.style,
                 backgroundColor,
                 color: '#fff', // ensure text is readable
+                cursor: clickable ? 'pointer' : restProps.style?.cursor,
             }}
         />
     );
@@ -59,17 +69,20 @@ const CustomMonthCell = ({ startDate, ...restProps }) => {
 
 export default function Dashboard({ auth }) {
 
-    const currentDate = '2023-06-07';
     const [data, setData] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     const getMonthlySchedule = () => {
+        setIsLoading(true);
         axios.get('api/contract_schedule/month')
             .then(res => {
-                console.log(res.data)
                 setData(res.data)
             })
             .catch(error => {
                 console.log(error)
+            })
+            .finally(() => {
+                setIsLoading(false)
             })
     }
 
@@ -85,28 +98,54 @@ export default function Dashboard({ auth }) {
             <Head>
                 <title>Bid-Watch - Calendar</title>
             </Head>
-            <Container>
-            {
-                !data ?
-                <h1>Loading...</h1> :
-                (
-                    <Paper className='mt-5'>
-                        <Scheduler
-                            data={data}
-                        >
-                            <ViewState defaultCurrentDate={new Date()} />
-                            <MonthView cellComponent={CustomMonthCell} />
-                            <DayView />
-                            <Toolbar/>
-                            <ViewSwitcher/>
-                            <DateNavigator/>
-                            <TodayButton/>
-                            <Appointments appointmentComponent={CustomAppointment} />
-                        </Scheduler>
-                    </Paper>
-                )
-            }
-            </Container>
+            <div className="mx-auto max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
+                <section className="site-panel mt-6 overflow-hidden rounded-[30px]">
+                    <div className="flex flex-col gap-3 border-b border-[#00234714] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#003f7d]">
+                                Interactive Planner
+                            </p>
+                            <h3 className="mt-1 text-xl font-semibold text-[#002347]">
+                                Procurement activity calendar
+                            </h3>
+                        </div>
+                        <p className="max-w-md text-sm leading-6 text-[#575757]">
+                            Switch between month and day views, jump to today, and scan schedule types faster with color-coded appointments.
+                        </p>
+                    </div>
+
+                    <div className="calendar-scheduler p-3 sm:p-5">
+                        {isLoading ? (
+                            <div className="flex min-h-[520px] items-center justify-center rounded-[24px] border border-dashed border-[#0023471f] bg-white/60 px-6 text-center">
+                                <div>
+                                    <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[#003f7d]">
+                                        Loading
+                                    </p>
+                                    <h3 className="mt-2 text-2xl font-semibold text-[#002347]">
+                                        Preparing the calendar view
+                                    </h3>
+                                    <p className="mt-2 text-sm text-[#575757]">
+                                        We&apos;re gathering the latest monthly schedule.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                            <Paper elevation={0} className="rounded-[24px] border border-[#00234712] bg-white/95 shadow-none">
+                                <Scheduler data={data}>
+                                    <ViewState defaultCurrentDate={new Date()} />
+                                    <MonthView cellComponent={CustomMonthCell} />
+                                    <DayView />
+                                    <Toolbar />
+                                    <ViewSwitcher />
+                                    <DateNavigator />
+                                    <TodayButton />
+                                    <Appointments appointmentComponent={CustomAppointment} />
+                                </Scheduler>
+                            </Paper>
+                        )}
+                    </div>
+                </section>
+            </div>
 
         </AuthenticatedLayout>
     );

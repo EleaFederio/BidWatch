@@ -275,6 +275,7 @@ export default function ContractDetails({ contract }) {
     const [status, setStatus] = useState('');
     const [errors, setErrors] = useState({});
     const [isSaving, setIsSaving] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
     const [previewPhotoIndex, setPreviewPhotoIndex] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showManageModal, setShowManageModal] = useState(false);
@@ -308,6 +309,7 @@ export default function ContractDetails({ contract }) {
     const closeAddModal = () => {
         setShowAddModal(false);
         setErrors({});
+        setUploadProgress(0);
         resetNewPhotoForm();
     };
 
@@ -336,7 +338,10 @@ export default function ContractDetails({ contract }) {
             return;
         }
 
-        const nextFiles = Array.from(files ?? []);
+        await handleSelectedPhotoFiles(Array.from(files ?? []), event.target);
+    };
+
+    const handleSelectedPhotoFiles = async (nextFiles, inputTarget = null) => {
         const requestId = metadataRequestRef.current + 1;
         metadataRequestRef.current = requestId;
         const oversizedFile = nextFiles.find((file) => file.size > MAX_PHOTO_SIZE_BYTES);
@@ -355,26 +360,33 @@ export default function ContractDetails({ contract }) {
                 longitude: '',
                 latitude: '',
             }));
-            event.target.value = '';
+            if (inputTarget) {
+                inputTarget.value = '';
+            }
 
             return;
         }
+
+        const existingFiles = newPhotoForm.photos ?? [];
+        const combinedFiles = [...existingFiles, ...nextFiles].filter((file, index, files) => {
+            const key = `${file.name}-${file.size}-${file.lastModified}`;
+
+            return files.findIndex((candidate) => `${candidate.name}-${candidate.size}-${candidate.lastModified}` === key) === index;
+        });
 
         setNewPhotoForm((current) => ({
             ...current,
-            photos: nextFiles,
-            photo_date: '',
-            photo_time: '',
-            location: '',
-            longitude: '',
-            latitude: '',
+            photos: combinedFiles,
         }));
 
-        if (nextFiles.length === 0) {
+        if (combinedFiles.length === 0) {
+            if (inputTarget) {
+                inputTarget.value = '';
+            }
             return;
         }
 
-        const metadata = await extractPhotoMetadata(nextFiles[0]);
+        const metadata = await extractPhotoMetadata(combinedFiles[0]);
 
         if (metadataRequestRef.current !== requestId) {
             return;
@@ -382,9 +394,13 @@ export default function ContractDetails({ contract }) {
 
         setNewPhotoForm((current) => ({
             ...current,
-            photos: nextFiles,
+            photos: combinedFiles,
             ...metadata,
         }));
+
+        if (inputTarget) {
+            inputTarget.value = '';
+        }
     };
 
     const handleAddPhotos = async (event) => {
@@ -392,28 +408,64 @@ export default function ContractDetails({ contract }) {
         setIsSaving(true);
         setStatus('');
         setErrors({});
+        setUploadProgress(0);
 
         try {
-            const payload = new FormData();
-            newPhotoForm.photos.forEach((file) => payload.append('photos[]', file));
-            payload.append('photo_date', newPhotoForm.photo_date);
-            payload.append('photo_time', newPhotoForm.photo_time);
-            payload.append('location', newPhotoForm.location);
-            payload.append('longitude', newPhotoForm.longitude);
-            payload.append('latitude', newPhotoForm.latitude);
+            if (!newPhotoForm.photos || newPhotoForm.photos.length === 0) {
+                setStatus('Please select at least one photo.');
+                setIsSaving(false);
+                return;
+            }
 
-            const response = await axios.post(`/contracts/${contract.id}/photos`, payload, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
+            const now = new Date();
+            const fallbackDate = now.toISOString().slice(0, 10);
+            const fallbackTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const files = newPhotoForm.photos;
+            const totalFiles = files.length;
+            let uploadedCount = 0;
+            const uploadedPhotos = [];
 
-            setPhotos((current) => [...response.data.data, ...current]);
-            setStatus('Photo upload successful.');
+            for (let index = 0; index < totalFiles; index += 1) {
+                const file = files[index];
+                const payload = new FormData();
+                payload.append('photos[]', file);
+                payload.append('photo_date', newPhotoForm.photo_date || fallbackDate);
+                payload.append('photo_time', newPhotoForm.photo_time || fallbackTime);
+                payload.append('location', newPhotoForm.location);
+                payload.append('longitude', newPhotoForm.longitude);
+                payload.append('latitude', newPhotoForm.latitude);
+
+                const response = await axios.post(`/contracts/${contract.id}/photos`, payload, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                    onUploadProgress: (progressEvent) => {
+                        if (!progressEvent.total) {
+                            return;
+                        }
+
+                        const currentFileProgress = progressEvent.loaded / progressEvent.total;
+                        const overallProgress = ((index + currentFileProgress) / totalFiles) * 100;
+                        setUploadProgress(Math.round(overallProgress));
+                    },
+                });
+
+                uploadedCount += 1;
+                setUploadProgress(Math.round((uploadedCount / totalFiles) * 100));
+                uploadedPhotos.push(...(response.data.data ?? []));
+            }
+
+            setPhotos((current) => [...uploadedPhotos, ...current]);
+            setStatus(`Photo upload successful (${uploadedCount} file${uploadedCount === 1 ? '' : 's'}).`);
             closeAddModal();
         } catch (error) {
             setErrors(error.response?.data?.errors ?? {});
-            setStatus(error.response?.data?.message ?? 'Unable to upload photo.');
+            if (error.response?.status === 413) {
+                setStatus('Upload is too large for the server limit. Try fewer/smaller files per upload, or increase server upload limits.');
+            } else {
+                setStatus(error.response?.data?.message ?? 'Unable to upload photo.');
+            }
         } finally {
             setIsSaving(false);
+            setUploadProgress(0);
         }
     };
 
@@ -735,8 +787,10 @@ export default function ContractDetails({ contract }) {
                 onClose={closeAddModal}
                 onSubmit={handleAddPhotos}
                 onChange={handleNewPhotoChange}
+                onFilesSelected={handleSelectedPhotoFiles}
                 form={newPhotoForm}
                 isSaving={isSaving}
+                uploadProgress={uploadProgress}
                 renderError={renderError}
                 maxPhotoSizeLabel={MAX_PHOTO_SIZE_LABEL}
             />

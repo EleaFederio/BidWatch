@@ -1,8 +1,12 @@
 import React from "react";
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import ProjectPhotoCard from '@/components/photos/ProjectPhotoCard';
+import ProjectPhotoCollage from '@/components/photos/ProjectPhotoCollage';
+import ProjectPhotoPreview from '@/components/photos/ProjectPhotoPreview';
 import { Head, Link } from "@inertiajs/react";
 import { Container } from "react-bootstrap";
-import DateObject from "react-date-object";
+import { useState } from 'react';
+import DateObject from 'react-date-object';
 
 const formatDate = (value) => {
     if (!value) {
@@ -23,6 +27,40 @@ const formatTime = (value) => {
 const PhotoManager = ({ auth, contracts = { data: [], links: [] } }) => {
     const contractItems = contracts.data ?? [];
     const paginationLinks = (contracts.links ?? []).filter((link) => link.url || link.active);
+    const [viewMode, setViewMode] = useState('collage');
+    const collagePhotos = contractItems.flatMap((contract) => (
+        (contract.photos ?? []).map((photo) => ({
+            ...photo,
+            contract_id: contract.contract_id,
+            contract_title: contract.title,
+        }))
+    ));
+    const [previewPhotoIndex, setPreviewPhotoIndex] = useState(null);
+    const previewPhoto = previewPhotoIndex !== null ? collagePhotos[previewPhotoIndex] ?? null : null;
+
+    const closePreviewModal = () => {
+        setPreviewPhotoIndex(null);
+    };
+
+    const showPreviousPreviewPhoto = () => {
+        setPreviewPhotoIndex((current) => {
+            if (current === null || collagePhotos.length === 0) {
+                return current;
+            }
+
+            return current === 0 ? collagePhotos.length - 1 : current - 1;
+        });
+    };
+
+    const showNextPreviewPhoto = () => {
+        setPreviewPhotoIndex((current) => {
+            if (current === null || collagePhotos.length === 0) {
+                return current;
+            }
+
+            return current === collagePhotos.length - 1 ? 0 : current + 1;
+        });
+    };
 
     return(
         <AuthenticatedLayout
@@ -35,73 +73,72 @@ const PhotoManager = ({ auth, contracts = { data: [], links: [] } }) => {
 
             <Container className="py-6">
                 <div className="space-y-6">
+                    <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h3 className="text-base font-semibold text-slate-900">Project Photo Library</h3>
+                            <p className="mt-0.5 text-sm text-slate-600">
+                                Choose between the detailed project card view or a more visual collage layout.
+                            </p>
+                        </div>
+                        <div className="inline-flex rounded-2xl border border-slate-200 bg-slate-50 p-1">
+                            <button
+                                type="button"
+                                onClick={() => setViewMode('cards')}
+                                className={`rounded-xl px-3 py-1.5 text-sm font-medium transition ${
+                                    viewMode === 'cards'
+                                        ? 'bg-slate-900 text-white shadow-sm'
+                                        : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                            >
+                                Project Cards
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setViewMode('collage')}
+                                className={`rounded-xl px-3 py-1.5 text-sm font-medium transition ${
+                                    viewMode === 'collage'
+                                        ? 'bg-slate-900 text-white shadow-sm'
+                                        : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                            >
+                                Photo Collage
+                            </button>
+                        </div>
+                    </div>
+
                     {contractItems.length === 0 && (
                         <div className="rounded-xl border border-dashed border-gray-300 bg-white p-6 text-center text-gray-500 shadow-sm">
                             No contracts found.
                         </div>
                     )}
 
-                    {contractItems.map((contract) => (
-                        <div key={contract.id} className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100">
-                            <div className="flex flex-col gap-3 border-b border-gray-100 pb-4 md:flex-row md:items-start md:justify-between">
-                                <div>
-                                    <h3 className="text-lg font-semibold text-gray-900">{contract.title}</h3>
-                                    <p className="text-sm text-gray-500">{contract.contract_id}</p>
-                                    <p className="mt-2 text-sm text-gray-600">
-                                        {contract.location || 'No location provided'}
-                                    </p>
-                                </div>
-                                <Link
-                                    href={`/contracts/${contract.contract_id}`}
-                                    className="inline-flex items-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-gray-700"
-                                >
-                                    View Project
-                                </Link>
-                            </div>
-
-                            <div className="mt-4">
-                                <div className="mb-3 flex items-center justify-between">
-                                    <h4 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
-                                        Linked Photos
-                                    </h4>
-                                    <span className="text-sm text-gray-500">
-                                        {contract.photos.length} photo{contract.photos.length === 1 ? '' : 's'}
-                                    </span>
-                                </div>
-
-                                {contract.photos.length === 0 ? (
-                                    <div className="rounded-xl bg-gray-50 p-4 text-sm text-gray-500">
-                                        No photos linked to this project yet.
-                                    </div>
-                                ) : (
-                                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                                        {contract.photos.map((photo) => (
-                                            <div key={photo.id} className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-                                                <img
-                                                    src={photo.photo_url}
-                                                    alt={`${contract.contract_id} project`}
-                                                    className="h-48 w-full object-cover"
-                                                />
-                                                <div className="space-y-1 p-4">
-                                                    <p className="text-sm font-semibold text-gray-900">
-                                                        {formatDate(photo.photo_date)} at {formatTime(photo.photo_time)}
-                                                    </p>
-                                                    <p className="text-sm text-gray-600">
-                                                        {photo.location || 'Location not provided'}
-                                                    </p>
-                                                    {photo.latitude && photo.longitude && (
-                                                        <p className="text-xs text-gray-500">
-                                                            {photo.latitude}, {photo.longitude}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
+                    {viewMode === 'cards' ? (
+                        contractItems.map((contract) => (
+                            <ProjectPhotoCard key={contract.id} contract={contract} />
+                        ))
+                    ) : (
+                        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                            {collagePhotos.map((photo, index) => (
+                                <ProjectPhotoCollage key={photo.id} photo={photo} onClick={() => setPreviewPhotoIndex(index)} />
+                            ))}
                         </div>
-                    ))}
+                    )}
+
+                    <ProjectPhotoPreview
+                        show={Boolean(previewPhoto)}
+                        onClose={closePreviewModal}
+                        previewPhoto={previewPhoto}
+                        previewPhotoIndex={previewPhotoIndex}
+                        sortedPhotos={collagePhotos}
+                        showPreviousPreviewPhoto={showPreviousPreviewPhoto}
+                        showNextPreviewPhoto={showNextPreviewPhoto}
+                        contractId={previewPhoto?.contract_id ?? ''}
+                        contractTitle={previewPhoto?.contract_title ?? ''}
+                        formatPostingDate={formatDate}
+                        formatPhotoTime={formatTime}
+                        actionHref={previewPhoto ? `/contracts/${previewPhoto.contract_id}` : undefined}
+                        actionLabel={previewPhoto ? 'View Project Details' : undefined}
+                    />
 
                     {paginationLinks.length > 1 && (
                         <div className="flex flex-wrap items-center justify-center gap-2">

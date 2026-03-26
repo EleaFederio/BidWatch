@@ -60,6 +60,37 @@ body {
     box-shadow: 0 18px 45px rgba(0, 35, 71, 0.08);
 }
 
+.calendar-scheduler .MuiPaper-root {
+    overflow: hidden;
+}
+
+.calendar-scheduler .MuiTableCell-head {
+    background: linear-gradient(180deg, rgba(0, 35, 71, 0.04) 0%, rgba(0, 35, 71, 0.01) 100%);
+}
+
+.calendar-scheduler .MuiButtonBase-root,
+.calendar-scheduler .MuiTypography-root,
+.calendar-scheduler .MuiToolbar-root {
+    font-family: inherit;
+}
+
+.calendar-scheduler .MuiButtonBase-root {
+    border-radius: 12px;
+}
+
+.calendar-scheduler .MuiButtonBase-root.Mui-selected {
+    background: rgba(0, 63, 125, 0.12);
+    color: var(--bw-navy-800);
+}
+
+.calendar-scheduler .MuiToolbar-root {
+    border-bottom: 1px solid rgba(0, 35, 71, 0.08);
+}
+
+.calendar-scheduler .MuiTableCell-root {
+    border-color: rgba(0, 35, 71, 0.08);
+}
+
 .leaflet-container,
 .leaflet-pane,
 .leaflet-top,

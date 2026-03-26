@@ -28,8 +28,26 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
     return (
         <>
             <div style={{backgroundImage: '../storage/images/background.JPG'}}>
-                <Head title="Bulletin" />
+                <Head title="Bulletin">
+                    <link rel="preconnect" href="https://fonts.googleapis.com" />
+                    <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+                    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+                </Head>
                 <div className="relative sm:flex sm:justify-center sm:items-center min-h-screen bg-dots-darker bg-center bg-gray-100 dark:bg-dots-lighter dark:bg-gray-900 selection:bg-red-500 selection:text-white">
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                        <h1
+                            className="text-center text-black"
+                            style={{
+                                fontSize: 'clamp(4rem, 12vw, 9rem)',
+                                fontFamily: "'Anton', sans-serif",
+                                letterSpacing: '0.08em',
+                                opacity: 0.95,
+                                zIndex: 1,
+                            }}
+                        >
+                            BidWatch
+                        </h1>
+                    </div>
                     <div className="sm:fixed sm:top-0 sm:right-0 p-6 text-right">
                         {auth.user ? (
                             <>

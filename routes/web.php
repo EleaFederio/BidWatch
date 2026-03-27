@@ -37,10 +37,13 @@ Route::get('/calendar', function () {
 })->middleware(['auth', 'verified'])->name('calendar');
 Route::get('/photos', [ContractController::class, 'photoManager'])->middleware(['auth', 'verified'])->name('photos');
 Route::get('/kanban', [KanbanController::class, 'index'])->middleware(['auth', 'verified'])->name('kanban');
+Route::get('/kanban/board-state', [KanbanController::class, 'boardState'])->middleware(['auth', 'verified'])->name('kanban.board.state');
 Route::post('/kanban/cards', [KanbanController::class, 'storeCard'])->middleware(['auth', 'verified'])->name('kanban.cards.store');
 Route::post('/kanban/columns', [KanbanController::class, 'storeColumn'])->middleware(['auth', 'verified'])->name('kanban.columns.store');
 Route::patch('/kanban/columns/{column}', [KanbanController::class, 'updateColumn'])->middleware(['auth', 'verified'])->name('kanban.columns.update');
 Route::patch('/kanban/cards/{card}', [KanbanController::class, 'moveCard'])->middleware(['auth', 'verified'])->name('kanban.cards.move');
+Route::patch('/kanban/cards/{card}/customize', [KanbanController::class, 'customizeCard'])->middleware(['auth', 'verified'])->name('kanban.cards.customize');
+Route::delete('/kanban/cards/{card}', [KanbanController::class, 'destroyCard'])->middleware(['auth', 'verified'])->name('kanban.cards.destroy');
 Route::delete('/kanban/columns/{column}', [KanbanController::class, 'destroyColumn'])->middleware(['auth', 'verified'])->name('kanban.columns.destroy');
 Route::get('/map', function () {
     return Inertia::render('Map');

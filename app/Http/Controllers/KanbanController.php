@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Contract;
 use App\Models\KanbanBoard;
 use App\Models\KanbanCard;
+use App\Models\KanbanChecklistItem;
 use App\Models\KanbanColumn;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -64,6 +65,15 @@ class KanbanController extends Controller
         return Inertia::render('Kanban', [
             'board' => $this->serializeBoard($board),
             'contracts' => $contracts,
+        ]);
+    }
+
+    public function boardState(Request $request): JsonResponse
+    {
+        $board = $this->getOrCreateDefaultBoard($request->user()?->id);
+
+        return response()->json([
+            'board' => $this->serializeBoard($board),
         ]);
     }
 
@@ -188,6 +198,90 @@ class KanbanController extends Controller
         ]);
     }
 
+    public function customizeCard(Request $request, KanbanCard $card): JsonResponse
+    {
+        $validated = $request->validate([
+            'label' => ['nullable', 'string', 'max:120'],
+            'label_color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'labels' => ['nullable', 'array', 'max:10'],
+            'labels.*.label' => ['required', 'string', 'max:120'],
+            'labels.*.color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'note' => ['nullable', 'string', 'max:2000'],
+            'checklist' => ['nullable', 'array', 'max:30'],
+            'checklist.*.label' => ['required', 'string', 'max:255'],
+            'checklist.*.is_done' => ['required', 'boolean'],
+        ]);
+
+        $board = $this->getOrCreateDefaultBoard($request->user()?->id);
+        abort_unless($card->board_id === $board->id, 404);
+
+        DB::transaction(function () use ($card, $validated) {
+            $labels = collect($validated['labels'] ?? [])
+                ->map(function (array $item): array {
+                    return [
+                        'label' => trim($item['label']),
+                        'color' => $item['color'] ?? '#003f7d',
+                    ];
+                })
+                ->filter(fn (array $item) => $item['label'] !== '')
+                ->values()
+                ->all();
+
+            if (count($labels) === 0 && isset($validated['label']) && trim($validated['label']) !== '') {
+                $labels[] = [
+                    'label' => trim($validated['label']),
+                    'color' => $validated['label_color'] ?? '#003f7d',
+                ];
+            }
+
+            $checklist = collect($validated['checklist'] ?? [])
+                ->map(function (array $item): array {
+                    return [
+                        'label' => trim($item['label']),
+                        'is_done' => (bool) $item['is_done'],
+                    ];
+                })
+                ->filter(fn (array $item) => $item['label'] !== '')
+                ->values();
+
+            $card->update([
+                'label' => count($labels) > 0 ? $labels[0]['label'] : null,
+                'label_color' => count($labels) > 0 ? $labels[0]['color'] : null,
+                'labels' => count($labels) > 0 ? $labels : null,
+                'description' => isset($validated['note']) && trim($validated['note']) !== '' ? trim($validated['note']) : null,
+            ]);
+
+            KanbanChecklistItem::query()->where('card_id', $card->id)->delete();
+
+            foreach ($checklist as $index => $item) {
+                KanbanChecklistItem::query()->create([
+                    'card_id' => $card->id,
+                    'label' => $item['label'],
+                    'is_done' => $item['is_done'],
+                    'position' => $index + 1,
+                ]);
+            }
+        });
+
+        return response()->json([
+            'message' => 'Card updated successfully.',
+            'board' => $this->serializeBoard($this->freshBoard($card->board_id)),
+        ]);
+    }
+
+    public function destroyCard(Request $request, KanbanCard $card): JsonResponse
+    {
+        $board = $this->getOrCreateDefaultBoard($request->user()?->id);
+        abort_unless($card->board_id === $board->id, 404);
+
+        $card->delete();
+
+        return response()->json([
+            'message' => 'Card deleted successfully.',
+            'board' => $this->serializeBoard($this->freshBoard($board->id)),
+        ]);
+    }
+
     public function destroyColumn(Request $request, KanbanColumn $column): JsonResponse
     {
         $board = $this->getOrCreateDefaultBoard($request->user()?->id);
@@ -233,7 +327,7 @@ class KanbanController extends Controller
     {
         $board = KanbanBoard::query()
             ->where('is_default', true)
-            ->with(['columns.cards.contract'])
+            ->with(['columns.cards.contract', 'columns.cards.checklistItems'])
             ->first();
 
         if ($board) {
@@ -274,7 +368,7 @@ class KanbanController extends Controller
         return KanbanBoard::query()
             ->with([
                 'columns' => fn ($query) => $query->orderBy('position'),
-                'columns.cards' => fn ($query) => $query->with('contract')->orderBy('position'),
+                'columns.cards' => fn ($query) => $query->with(['contract', 'checklistItems'])->orderBy('position'),
             ])
             ->findOrFail($boardId);
     }
@@ -293,12 +387,33 @@ class KanbanController extends Controller
                     'position' => $column->position,
                     'color' => $column->color,
                     'cards' => $column->cards->map(function (KanbanCard $card) {
+                        $labels = is_array($card->labels) ? $card->labels : [];
+
+                        if (count($labels) === 0 && $card->label) {
+                            $labels[] = [
+                                'label' => $card->label,
+                                'color' => $card->label_color ?? '#003f7d',
+                            ];
+                        }
+
                         return [
                             'id' => $card->id,
                             'title' => $card->title,
+                            'label' => $card->label,
+                            'label_color' => $card->label_color,
+                            'labels' => $labels,
+                            'note' => $card->description,
                             'meta' => $card->contract?->contract_id ?? 'Unlinked project',
                             'location' => $card->contract?->location ?? 'No location provided',
                             'contract_id' => $card->contract_id,
+                            'contract_code' => $card->contract?->contract_id,
+                            'checklist' => $card->checklistItems->map(function (KanbanChecklistItem $item) {
+                                return [
+                                    'id' => $item->id,
+                                    'label' => $item->label,
+                                    'is_done' => $item->is_done,
+                                ];
+                            })->values()->all(),
                         ];
                     })->values()->all(),
                 ];

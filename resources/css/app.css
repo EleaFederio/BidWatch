@@ -245,6 +245,8 @@ body {
     justify-content: center;
     width: 2rem;
     height: 2rem;
+    padding-top: 10px;
+    padding-bottom: 10px;
     border: 1px solid rgba(0, 35, 71, 0.12);
     border-radius: 999px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 246, 244, 0.98) 100%);
@@ -394,8 +396,10 @@ body {
 }
 
 .kanban-card-head {
+    position: relative;
     border-bottom: 1px solid rgba(0, 35, 71, 0.07);
     padding-bottom: 0.7rem;
+    padding-right: 2.2rem;
 }
 
 .kanban-card-title {
@@ -404,6 +408,22 @@ body {
     font-weight: 700;
     line-height: 1.5;
     color: var(--bw-gray-900);
+}
+
+.kanban-card-settings {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.kanban-card-settings .kanban-settings-button {
+    width: 1.6rem;
+    height: 1.6rem;
+}
+
+.kanban-card-settings .kanban-settings-icon {
+    width: 0.82rem;
+    height: 0.82rem;
 }
 
 .kanban-card-meta {

@@ -16,6 +16,9 @@ class KanbanCard extends Model
         'column_id',
         'contract_id',
         'title',
+        'label',
+        'label_color',
+        'labels',
         'description',
         'position',
         'assigned_to',
@@ -25,6 +28,7 @@ class KanbanCard extends Model
 
     protected $casts = [
         'due_date' => 'date',
+        'labels' => 'array',
     ];
 
     public function board(): BelongsTo

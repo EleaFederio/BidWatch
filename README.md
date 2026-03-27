@@ -1,6 +1,6 @@
-# BidWatch
+# InfraBidWatch
 
-BidWatch is a Laravel + Inertia.js web application for tracking procurement contracts and project activities. It includes contract monitoring, schedules, project photo management, announcements, mapping, and supporting admin pages.
+BidWatch is a Laravel + Inertia.js web application designed for the Public Information Office and the Engineering Office. It helps monitor procurement contracts and project activities, organize infrastructure reporting, and support decision-making on which project is the best candidate to be reported as news.
 
 ## Features
 
@@ -13,7 +13,10 @@ BidWatch is a Laravel + Inertia.js web application for tracking procurement cont
 - Per-contract photo upload, replace, and delete
 - Infrastructure map page
 - Announcer page with text-to-speech
-- Kanban page route and navigation
+- Kanban board with draggable cards and customizable columns
+- Card customization with multiple labels, notes, and checklist items
+- Card delete confirmation and quick project navigation from kanban cards
+- Near real-time kanban board sync for logged-in users
 - Authenticated app shell with fixed navbar and breadcrumbs
 
 ## Tech Stack
@@ -69,9 +72,28 @@ If you are using PowerShell and `.env` already exists, skip the copy step.
 - `/dashboard` - contracts overview
 - `/calendar` - bid schedule calendar
 - `/photos` - project photo manager
-- `/kanban` - kanban page
+- `/kanban` - infrastructure reporting kanban board
 - `/map` - infrastructure map
 - `/announcer` - announcement and text-to-speech page
+
+## Kanban Board
+
+The kanban board is designed for the Public Information Office and Engineering Office workflow, helping teams monitor project progress and decide which project is the strongest candidate for public reporting or news coverage. It currently supports:
+
+- adding projects from the contract list into the backlog
+- dragging cards across workflow columns
+- adding, updating, and deleting custom columns
+- customizing cards with multiple colored labels
+- adding notes and checklist items to cards
+- deleting cards with confirmation
+- opening the related contract details page from a card
+- automatic board refresh for other logged-in users after card movement and other board updates
+
+If you are pulling the latest changes, make sure all kanban migrations are applied:
+
+```bash
+php artisan migrate
+```
 
 ## Contract Photos
 
@@ -100,10 +122,13 @@ Examples already present in the project:
 ## Development Notes
 
 - Frontend pages are located in [`resources/js/Pages`](resources/js/Pages)
+- Kanban UI is primarily in [`resources/js/Pages/Kanban.jsx`](resources/js/Pages/Kanban.jsx)
+- Kanban modal components are in [`resources/js/components/kanban`](resources/js/components/kanban)
 - Shared authenticated layout is in [`resources/js/Layouts/AuthenticatedLayout.jsx`](resources/js/Layouts/AuthenticatedLayout.jsx)
 - Contract and photo logic is handled in:
   - [`app/Http/Controllers/ContractController.php`](app/Http/Controllers/ContractController.php)
   - [`app/Http/Controllers/PhotoController.php`](app/Http/Controllers/PhotoController.php)
+- Kanban backend logic is handled in [`app/Http/Controllers/KanbanController.php`](app/Http/Controllers/KanbanController.php)
 
 ## Port Forward / HTTPS Note
 

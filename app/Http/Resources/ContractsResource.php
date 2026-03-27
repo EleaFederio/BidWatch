@@ -28,7 +28,18 @@ class ContractsResource extends JsonResource
             'opening_of_bids_schedule' => $this->opening_of_bids,
             'bulletinboard_posting' => Carbon::createFromFormat('Y-m-d H:i:s',  $this->bulletin_posting.' 00:00:00')->format('F d, Y'),
             'bulletinboard_removal' => Carbon::createFromFormat('Y-m-d H:i:s',  $this->bulletin_removal.' 00:00:00')->format('F d, Y'),
-            'archieve' => $this->archieve
+            'archieve' => $this->archieve,
+            'status' => $this->status,
+            'current_project_status' => $this->whenLoaded('projectStatuses', fn () => optional($this->projectStatuses->first(), function ($projectStatus) {
+                return [
+                    'id' => $projectStatus->id,
+                    'status_name' => $projectStatus->status_name,
+                ];
+            })),
+            'project_statuses' => $this->whenLoaded('projectStatuses', fn () => $this->projectStatuses->map(fn ($projectStatus) => [
+                'id' => $projectStatus->id,
+                'status_name' => $projectStatus->status_name,
+            ])->take(1)->values()),
         ];
     }
 

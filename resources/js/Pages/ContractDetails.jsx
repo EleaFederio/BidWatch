@@ -2,7 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import ContractDetails from '@/components/contracts/ContractDetails';
 import { Head } from '@inertiajs/react';
 
-export default function ContractDetailsPage({ auth, contract }) {
+export default function ContractDetailsPage({ auth, contract, availableStatuses = [] }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -11,7 +11,7 @@ export default function ContractDetailsPage({ auth, contract }) {
             <Head title={`Contract ${contract.contract_id}`} />
 
             <div className="py-8">
-                <ContractDetails contract={contract} />
+                <ContractDetails contract={contract} availableStatuses={availableStatuses} />
             </div>
         </AuthenticatedLayout>
     );

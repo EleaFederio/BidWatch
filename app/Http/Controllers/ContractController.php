@@ -9,6 +9,7 @@ use App\Http\Resources\MonthlyOpeningOfBidsCollection;
 use App\Http\Resources\MonthlyPreBidCollection;
 use App\Models\Contract;
 use App\Models\Photo;
+use App\Models\ProjectStatus;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -29,7 +30,8 @@ class ContractController extends Controller
     {
         $search = trim((string) $request->query('search', ''));
 
-        $contracts = DB::table('contracts')
+        $contracts = Contract::query()
+            ->with('projectStatuses:id,status_name')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($innerQuery) use ($search) {
                     $innerQuery->where('title', 'like', '%' . $search . '%')
@@ -69,9 +71,33 @@ class ContractController extends Controller
             'opening_of_bids' => 'required|date_format:Y-m-d H:i:s',
             'bulletin_posting' => 'required|date',
             'bulletin_removal' => 'required|date',
-            'archieve' => 'required'
+            'archieve' => 'required',
+            'project_status_id' => 'nullable|integer|exists:project_status,id',
         ]);
-        Contract::create($request->all());
+
+        $statusLabel = $this->resolvePrimaryStatusLabel(
+            $request->input('project_status_id'),
+            $request->boolean('archieve')
+        );
+
+        $contract = Contract::create([
+            ...$request->only([
+                'contract_id',
+                'title',
+                'description',
+                'location',
+                'approved_budget',
+                'pre_bid',
+                'opening_of_bids',
+                'bulletin_posting',
+                'bulletin_removal',
+                'archieve',
+            ]),
+            'status' => $statusLabel,
+        ]);
+
+        $this->syncProjectStatuses($contract, $request->input('project_status_id'));
+
         return response()->json([
             'success' => true,
             'message' => 'Contract Added!'
@@ -99,9 +125,12 @@ class ContractController extends Controller
 
     public function details($contractID)
     {
-        $contract = Contract::with(['photos' => function ($query) {
-            $query->orderByDesc('photo_date')->orderByDesc('photo_time');
-        }])->where('contract_id', $contractID)->firstOrFail();
+        $contract = Contract::with([
+            'projectStatuses:id,status_name',
+            'photos' => function ($query) {
+                $query->orderByDesc('photo_date')->orderByDesc('photo_time');
+            },
+        ])->where('contract_id', $contractID)->firstOrFail();
 
         $contract->photos->transform(function ($photo) {
             $path = $photo->file_path;
@@ -115,6 +144,10 @@ class ContractController extends Controller
 
         return Inertia::render('ContractDetails', [
             'contract' => $contract,
+            'availableStatuses' => ProjectStatus::query()
+                ->select('id', 'status_name')
+                ->orderBy('status_name')
+                ->get(),
         ]);
     }
 
@@ -247,8 +280,13 @@ class ContractController extends Controller
                 'pre_bid' => 'nullable|date_format:Y-m-d H:i:s',
                 'opening_of_bids' => 'required|date_format:Y-m-d H:i:s',
                 'bulletin_posting' => 'required|date',
-                'bulletin_removal' => 'required|date'
+                'bulletin_removal' => 'required|date',
+                'project_status_id' => 'nullable|integer|exists:project_status,id',
             ]);
+            $statusLabel = $this->resolvePrimaryStatusLabel(
+                $request->input('project_status_id'),
+                $request->boolean('archieve')
+            );
             $contract->contract_id = $request->contract_id;
             $contract->title = $request->title;
             $contract->description = $request->description;
@@ -259,7 +297,9 @@ class ContractController extends Controller
             $contract->bulletin_posting = $request->bulletin_posting;
             $contract->bulletin_removal = $request->bulletin_removal;
             $contract->archieve = $request->archieve;
+            $contract->status = $statusLabel;
             $contract->save();
+            $this->syncProjectStatuses($contract, $request->input('project_status_id'));
 
             // response JSON
             return response()->json([
@@ -271,6 +311,26 @@ class ContractController extends Controller
             'success' => false,
             'message' => 'Contract doesn\'t exist!'
         ]);
+    }
+
+    protected function resolvePrimaryStatusLabel($projectStatusId = null, bool $isArchived = false): string
+    {
+        $selectedStatus = ProjectStatus::query()
+            ->whereKey($projectStatusId)
+            ->value('status_name');
+
+        if ($selectedStatus) {
+            return $selectedStatus;
+        }
+
+        return $isArchived ? 'Archived' : 'Active';
+    }
+
+    protected function syncProjectStatuses(Contract $contract, $projectStatusId = null): void
+    {
+        $contract->projectStatuses()->sync(
+            $projectStatusId ? [(int) $projectStatusId] : []
+        );
     }
 
     public function threeMonthRecord(){

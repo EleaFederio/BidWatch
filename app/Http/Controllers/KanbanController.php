@@ -58,7 +58,7 @@ class KanbanController extends Controller
         $board = $this->getOrCreateDefaultBoard($request->user()?->id);
 
         $contracts = Contract::query()
-            ->select(['id', 'contract_id', 'title', 'location'])
+            ->select(['id', 'contract_id', 'title', 'location', 'status'])
             ->orderByDesc('id')
             ->get();
 
@@ -404,6 +404,7 @@ class KanbanController extends Controller
                             'labels' => $labels,
                             'note' => $card->description,
                             'meta' => $card->contract?->contract_id ?? 'Unlinked project',
+                            'status' => $card->contract?->status ?? null,
                             'location' => $card->contract?->location ?? 'No location provided',
                             'contract_id' => $card->contract_id,
                             'contract_code' => $card->contract?->contract_id,

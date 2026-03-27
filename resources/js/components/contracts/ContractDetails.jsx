@@ -1,9 +1,11 @@
 import Modal from '@/components/Modal';
 import ContractDetailsAddPhotoModal from '@/components/contracts/ContractDetailsAddPhotoModal';
+import ContractEditDetailsModal from '@/components/contracts/ContractEditDetailsModal';
 import ContractDetailsManageProjectPhotoModal from '@/components/contracts/ContractDetailsManageProjectPhotoModal';
 import ProjectPhotoPreview from '@/components/photos/ProjectPhotoPreview';
 import { Link } from '@inertiajs/react';
 import { Card, CardBody, Chip, Typography } from '@material-tailwind/react';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import axios from 'axios';
 import DateObject from 'react-date-object';
 import { useRef, useState } from 'react';
@@ -270,11 +272,17 @@ const formatBudget = (value) => {
     }).format(amount);
 };
 
-export default function ContractDetails({ contract }) {
+export default function ContractDetails({ contract, availableStatuses = [] }) {
+    const resolveLinkedStatus = (contractRecord) => contractRecord?.projectStatuses?.[0]?.status_name
+        || contractRecord?.status
+        || (contractRecord?.archieve ? 'Archived' : 'Active');
+
+    const [contractInfo, setContractInfo] = useState(contract);
     const [photos, setPhotos] = useState(contract.photos ?? []);
     const [status, setStatus] = useState('');
     const [errors, setErrors] = useState({});
     const [isSaving, setIsSaving] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [previewPhotoIndex, setPreviewPhotoIndex] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
@@ -291,9 +299,23 @@ export default function ContractDetails({ contract }) {
         longitude: '',
         latitude: '',
     });
+    const [editForm, setEditForm] = useState({
+        contract_id: contract.contract_id ?? '',
+        title: contract.title ?? '',
+        description: contract.description ?? '',
+        location: contract.location ?? '',
+        approved_budget: contract.approved_budget ?? '',
+        pre_bid: contract.pre_bid ? String(contract.pre_bid).replace(' ', 'T').slice(0, 16) : '',
+        opening_of_bids: contract.opening_of_bids ? String(contract.opening_of_bids).replace(' ', 'T').slice(0, 16) : '',
+        bulletin_posting: contract.bulletin_posting ? String(contract.bulletin_posting).slice(0, 10) : '',
+        bulletin_removal: contract.bulletin_removal ? String(contract.bulletin_removal).slice(0, 10) : '',
+        archieve: Number(contract.archieve ?? 0),
+        project_status_id: contract.projectStatuses?.[0]?.id ? String(contract.projectStatuses[0].id) : '',
+    });
 
     const sortedPhotos = [...photos].sort((left, right) => `${right.photo_date} ${right.photo_time}`.localeCompare(`${left.photo_date} ${left.photo_time}`));
     const previewPhoto = previewPhotoIndex !== null ? sortedPhotos[previewPhotoIndex] ?? null : null;
+    const formatDateTimeForApi = (value) => (value ? `${value.replace('T', ' ')}:00` : null);
 
     const resetNewPhotoForm = () => {
         setNewPhotoForm({
@@ -311,6 +333,33 @@ export default function ContractDetails({ contract }) {
         setErrors({});
         setUploadProgress(0);
         resetNewPhotoForm();
+    };
+
+    const syncEditForm = (nextContract) => {
+        setEditForm({
+            contract_id: nextContract.contract_id ?? '',
+            title: nextContract.title ?? '',
+            description: nextContract.description ?? '',
+            location: nextContract.location ?? '',
+            approved_budget: nextContract.approved_budget ?? '',
+            pre_bid: nextContract.pre_bid ? String(nextContract.pre_bid).replace(' ', 'T').slice(0, 16) : '',
+            opening_of_bids: nextContract.opening_of_bids ? String(nextContract.opening_of_bids).replace(' ', 'T').slice(0, 16) : '',
+            bulletin_posting: nextContract.bulletin_posting ? String(nextContract.bulletin_posting).slice(0, 10) : '',
+            bulletin_removal: nextContract.bulletin_removal ? String(nextContract.bulletin_removal).slice(0, 10) : '',
+            archieve: Number(nextContract.archieve ?? 0),
+            project_status_id: nextContract.projectStatuses?.[0]?.id ? String(nextContract.projectStatuses[0].id) : '',
+        });
+    };
+
+    const openEditModal = () => {
+        syncEditForm(contractInfo);
+        setErrors({});
+        setShowEditModal(true);
+    };
+
+    const closeEditModal = () => {
+        setShowEditModal(false);
+        setErrors({});
     };
 
     const openManageModal = () => {
@@ -586,6 +635,66 @@ export default function ContractDetails({ contract }) {
         <p className="mt-1 text-sm text-red-600">{errors[field][0]}</p>
     ) : null;
 
+    const handleEditFormChange = (event) => {
+        const { name, value } = event.target;
+
+        setEditForm((current) => ({
+            ...current,
+            [name]: name === 'archieve' ? Number(value) : value,
+        }));
+    };
+
+    const handleEditContract = async (event) => {
+        event.preventDefault();
+        setIsSaving(true);
+        setErrors({});
+        setStatus('');
+
+        try {
+            await axios.put(`/api/contracts/${contractInfo.id}`, {
+                contract_id: editForm.contract_id,
+                title: editForm.title,
+                description: editForm.description,
+                location: editForm.location,
+                approved_budget: editForm.approved_budget,
+                pre_bid: formatDateTimeForApi(editForm.pre_bid),
+                opening_of_bids: formatDateTimeForApi(editForm.opening_of_bids),
+                bulletin_posting: editForm.bulletin_posting,
+                bulletin_removal: editForm.bulletin_removal,
+                archieve: Number(editForm.archieve),
+                project_status_id: editForm.project_status_id || null,
+            });
+
+            const linkedStatus = availableStatuses.find((item) => String(item.id) === String(editForm.project_status_id)) ?? null;
+
+            const nextContract = {
+                ...contractInfo,
+                contract_id: editForm.contract_id,
+                title: editForm.title,
+                description: editForm.description,
+                location: editForm.location,
+                approved_budget: editForm.approved_budget,
+                pre_bid: formatDateTimeForApi(editForm.pre_bid),
+                opening_of_bids: formatDateTimeForApi(editForm.opening_of_bids),
+                bulletin_posting: editForm.bulletin_posting,
+                bulletin_removal: editForm.bulletin_removal,
+                archieve: Number(editForm.archieve),
+                status: linkedStatus?.status_name || (Number(editForm.archieve) ? 'Archived' : 'Active'),
+                projectStatuses: linkedStatus ? [linkedStatus] : [],
+            };
+
+            setContractInfo(nextContract);
+            syncEditForm(nextContract);
+            setStatus('Contract details updated successfully.');
+            setShowEditModal(false);
+        } catch (error) {
+            setErrors(error.response?.data?.errors ?? {});
+            setStatus(error.response?.data?.message ?? 'Unable to update contract details.');
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     const closePreviewModal = () => {
         setPreviewPhotoIndex(null);
     };
@@ -617,26 +726,45 @@ export default function ContractDetails({ contract }) {
                     <div className="flex flex-col gap-3 border-b border-blue-gray-50 pb-4 md:flex-row md:items-start md:justify-between">
                         <div>
                             <Typography variant="h3" color="blue-gray">
-                                {contract.title}
+                                {contractInfo.title}
                             </Typography>
                             <Typography variant="lead" className="mt-1 text-blue-gray-600">
-                                {contract.contract_id}
+                                {contractInfo.contract_id}
                             </Typography>
                         </div>
-                        <Chip
-                            value={contract.archieve ? 'Archived' : 'Active'}
-                            color={contract.archieve ? 'blue-gray' : 'green'}
-                            className="w-fit"
-                        />
+                        <div className="flex items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={openEditModal}
+                                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-blue-gray-200 bg-white text-blue-gray-800 shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-gray-50 hover:shadow-md"
+                                aria-label="Edit contract details"
+                                title="Edit contract details"
+                            >
+                                <SettingsOutlinedIcon fontSize="small" />
+                            </button>
+                            <Chip
+                                value={resolveLinkedStatus(contractInfo)}
+                                color={contractInfo.archieve ? 'blue-gray' : 'green'}
+                                className="w-fit"
+                            />
+                        </div>
                     </div>
 
                     <div className="grid gap-3 md:grid-cols-2">
                         <div className="rounded-xl bg-blue-gray-50 p-3.5">
                             <Typography variant="small" className="font-semibold uppercase tracking-wide text-blue-gray-500">
+                                Current Status
+                            </Typography>
+                            <Typography className="mt-1.5 text-sm text-blue-gray-900">
+                                {resolveLinkedStatus(contractInfo)}
+                            </Typography>
+                        </div>
+                        <div className="rounded-xl bg-blue-gray-50 p-3.5">
+                            <Typography variant="small" className="font-semibold uppercase tracking-wide text-blue-gray-500">
                                 Location
                             </Typography>
                             <Typography className="mt-1.5 text-sm text-blue-gray-900">
-                                {contract.location || 'No location provided'}
+                                {contractInfo.location || 'No location provided'}
                             </Typography>
                         </div>
                         <div className="rounded-xl bg-blue-gray-50 p-3.5">
@@ -644,7 +772,7 @@ export default function ContractDetails({ contract }) {
                                 Approved Budget
                             </Typography>
                             <Typography className="mt-1.5 text-sm text-blue-gray-900">
-                                {formatBudget(contract.approved_budget)}
+                                {formatBudget(contractInfo.approved_budget)}
                             </Typography>
                         </div>
                         <div className="rounded-xl bg-blue-gray-50 p-3.5">
@@ -652,7 +780,7 @@ export default function ContractDetails({ contract }) {
                                 Pre-Bid Conference
                             </Typography>
                             <Typography className="mt-1.5 text-sm text-blue-gray-900">
-                                {formatSchedule(contract.pre_bid)}
+                                {formatSchedule(contractInfo.pre_bid)}
                             </Typography>
                         </div>
                         <div className="rounded-xl bg-blue-gray-50 p-3.5">
@@ -660,7 +788,7 @@ export default function ContractDetails({ contract }) {
                                 Opening of Bids
                             </Typography>
                             <Typography className="mt-1.5 text-sm text-blue-gray-900">
-                                {formatSchedule(contract.opening_of_bids)}
+                                {formatSchedule(contractInfo.opening_of_bids)}
                             </Typography>
                         </div>
                         <div className="rounded-xl bg-blue-gray-50 p-3.5">
@@ -668,7 +796,7 @@ export default function ContractDetails({ contract }) {
                                 Bulletin Posting
                             </Typography>
                             <Typography className="mt-1.5 text-sm text-blue-gray-900">
-                                {formatPostingDate(contract.bulletin_posting)}
+                                {formatPostingDate(contractInfo.bulletin_posting)}
                             </Typography>
                         </div>
                         <div className="rounded-xl bg-blue-gray-50 p-3.5">
@@ -676,7 +804,7 @@ export default function ContractDetails({ contract }) {
                                 Bulletin Removal
                             </Typography>
                             <Typography className="mt-1.5 text-sm text-blue-gray-900">
-                                {formatPostingDate(contract.bulletin_removal)}
+                                {formatPostingDate(contractInfo.bulletin_removal)}
                             </Typography>
                         </div>
                     </div>
@@ -686,7 +814,7 @@ export default function ContractDetails({ contract }) {
                             Description
                         </Typography>
                         <Typography className="mt-2 whitespace-pre-line text-sm leading-6 text-blue-gray-900">
-                            {contract.description || 'No description provided'}
+                            {contractInfo.description || 'No description provided'}
                         </Typography>
                     </div>
 
@@ -746,7 +874,7 @@ export default function ContractDetails({ contract }) {
                                     >
                                         <img
                                             src={photo.photo_url}
-                                            alt={`${contract.contract_id} project photo`}
+                                            alt={`${contractInfo.contract_id} project photo`}
                                             className="h-40 w-full cursor-zoom-in object-cover"
                                         />
                                         <div className="space-y-1 p-3">
@@ -771,7 +899,7 @@ export default function ContractDetails({ contract }) {
                             Back to Dashboard
                         </Link>
                         <a
-                            href={`/contract/certification/${contract.contract_id}`}
+                            href={`/contract/certification/${contractInfo.contract_id}`}
                             target="_blank"
                             rel="noreferrer"
                             className="rounded-lg border border-blue-gray-200 px-4 py-2 text-sm font-semibold text-blue-gray-800 transition hover:bg-blue-gray-50"
@@ -807,7 +935,7 @@ export default function ContractDetails({ contract }) {
                 sortedPhotos={sortedPhotos}
                 togglePhotoSelection={togglePhotoSelection}
                 handlePhotoDoubleClick={handlePhotoDoubleClick}
-                contract={contract}
+                contract={contractInfo}
                 formatPostingDate={formatPostingDate}
                 formatPhotoTime={formatPhotoTime}
             />
@@ -820,10 +948,21 @@ export default function ContractDetails({ contract }) {
                 sortedPhotos={sortedPhotos}
                 showPreviousPreviewPhoto={showPreviousPreviewPhoto}
                 showNextPreviewPhoto={showNextPreviewPhoto}
-                contractId={contract.contract_id}
-                contractTitle={contract.title}
+                contractId={contractInfo.contract_id}
+                contractTitle={contractInfo.title}
                 formatPostingDate={formatPostingDate}
                 formatPhotoTime={formatPhotoTime}
+            />
+
+            <ContractEditDetailsModal
+                show={showEditModal}
+                onClose={closeEditModal}
+                onSubmit={handleEditContract}
+                editForm={editForm}
+                availableStatuses={availableStatuses}
+                onChange={handleEditFormChange}
+                renderError={renderError}
+                isSaving={isSaving}
             />
         </div>
     );

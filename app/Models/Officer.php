@@ -8,4 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Officer extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'firstName',
+        'middleName',
+        'lastName',
+        'designation',
+        'position',
+    ];
 }

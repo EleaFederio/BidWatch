@@ -899,7 +899,7 @@ export default function ContractDetails({ contract, availableStatuses = [] }) {
                             Back to Dashboard
                         </Link>
                         <a
-                            href={`/contract/certification/${contractInfo.contract_id}`}
+                            href={`/contracts/${contractInfo.contract_id}/certification`}
                             target="_blank"
                             rel="noreferrer"
                             className="rounded-lg border border-blue-gray-200 px-4 py-2 text-sm font-semibold text-blue-gray-800 transition hover:bg-blue-gray-50"

@@ -54,6 +54,12 @@ Route::get('/announcer', function () {
 Route::get('/contracts/{contractID}', [ContractController::class, 'details'])
     ->middleware(['auth', 'verified'])
     ->name('contracts.details');
+
+// Backward-compatible redirect for old legacy URL
+Route::get('/contract/certification/{contractID}', function ($contractID) {
+    return redirect()->route('contracts.certification', $contractID);
+});
+
 Route::post('/contracts/{contract}/photos', [PhotoController::class, 'store'])
     ->middleware(['auth', 'verified'])
     ->name('contracts.photos.store');
@@ -76,6 +82,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/settings', [SettingsController::class, 'destroy'])->name('settings.destroy');
 });
 
-Route::get('/contract/certification/{contractID}', [ContractController::class, 'createCertification']);
+Route::get('/contracts/{contractID}/certification', [ContractController::class, 'createCertification'])
+    ->middleware(['auth', 'verified'])
+    ->name('contracts.certification');
 
 require __DIR__.'/auth.php';

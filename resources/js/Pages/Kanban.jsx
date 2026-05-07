@@ -110,6 +110,7 @@ export default function Kanban({ auth, contracts = [], board = null }) {
     const [showColumnModal, setShowColumnModal] = useState(false);
     const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
     const [selectedProjectId, setSelectedProjectId] = useState('');
+    const [projectSearchQuery, setProjectSearchQuery] = useState('');
     const [newColumnName, setNewColumnName] = useState('');
     const [newColumnDescription, setNewColumnDescription] = useState('');
     const [draggedCard, setDraggedCard] = useState(null);
@@ -147,10 +148,36 @@ export default function Kanban({ auth, contracts = [], board = null }) {
         }));
     }, [contracts]);
 
+    const filteredProjectOptions = useMemo(() => {
+        const query = projectSearchQuery.trim().toLowerCase();
+
+        if (!query) {
+            return projectOptions;
+        }
+
+        return projectOptions.filter((project) =>
+            project.contract_id.toLowerCase().includes(query)
+            || project.title.toLowerCase().includes(query)
+            || project.location.toLowerCase().includes(query),
+        );
+    }, [projectOptions, projectSearchQuery]);
+
     const selectedProject = useMemo(
         () => projectOptions.find((project) => String(project.id) === selectedProjectId),
         [projectOptions, selectedProjectId],
     );
+
+    useEffect(() => {
+        if (!selectedProjectId) {
+            return;
+        }
+
+        const stillVisible = filteredProjectOptions.some((project) => String(project.id) === selectedProjectId);
+
+        if (!stillVisible) {
+            setSelectedProjectId('');
+        }
+    }, [filteredProjectOptions, selectedProjectId]);
 
     const totalCardCount = columns.reduce((count, column) => count + column.cards.length, 0);
 
@@ -212,6 +239,7 @@ export default function Kanban({ auth, contracts = [], board = null }) {
 
     const openProjectModal = () => {
         setSelectedProjectId('');
+        setProjectSearchQuery('');
         setActiveCardMenuId(null);
         setShowProjectModal(true);
     };
@@ -219,6 +247,7 @@ export default function Kanban({ auth, contracts = [], board = null }) {
     const closeProjectModal = () => {
         setShowProjectModal(false);
         setSelectedProjectId('');
+        setProjectSearchQuery('');
     };
 
     const openColumnModal = () => {
@@ -714,23 +743,40 @@ export default function Kanban({ auth, contracts = [], board = null }) {
                     </div>
 
                     <div className="kanban-modal-body">
-                        <label htmlFor="kanban-project-list" className="kanban-picker-label">
-                            Select a project
+                        <label htmlFor="kanban-project-search" className="kanban-picker-label">
+                            Search projects
+                        </label>
+                        <input
+                            id="kanban-project-search"
+                            type="search"
+                            value={projectSearchQuery}
+                            onChange={(event) => setProjectSearchQuery(event.target.value)}
+                            className="kanban-form-input"
+                            placeholder="Search by contract ID, title, or location"
+                            disabled={isSavingCard}
+                        />
+
+                        <label htmlFor="kanban-project-list" className="kanban-picker-label" style={{ marginTop: '1rem' }}>
+                            Choose a project
                         </label>
                         <select
                             id="kanban-project-list"
                             value={selectedProjectId}
                             onChange={(event) => setSelectedProjectId(event.target.value)}
                             className="kanban-picker-select"
-                            disabled={isSavingCard}
+                            disabled={isSavingCard || filteredProjectOptions.length === 0}
                         >
                             <option value="">Choose from project list</option>
-                            {projectOptions.map((project) => (
+                            {filteredProjectOptions.map((project) => (
                                 <option key={project.id} value={String(project.id)}>
                                     {project.contract_id} - {project.title}
                                 </option>
                             ))}
                         </select>
+
+                        {filteredProjectOptions.length === 0 && (
+                            <p className="kanban-picker-hint">No projects match your search query.</p>
+                        )}
 
                         {selectedProject && (
                             <div className="kanban-project-preview">

@@ -13,10 +13,12 @@ use App\Models\ProjectStatus;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
-use \PDF;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 
 use function PHPUnit\Framework\isEmpty;
 
@@ -370,19 +372,72 @@ class ContractController extends Controller
         ]);
     }
 
-    public function createCertification($contractID){
-        $contract = Contract::where('contract_id', $contractID)->first();
-        if($contract == ''){
+    public function createCertification(Request $request, $contractID)
+    {
+        $contract = Contract::where('contract_id', $contractID)
+            ->with([]) // add relationships if needed to avoid N+1
+            ->first();
+
+        if (!$contract) {
             return response()->json([
                 'success' => false,
-                'message' => 'Contract Doesn\'t Exist!'
+                'message' => 'Contract does not exist',
+            ], 404);
+        }
+
+        // Prefer same-origin, secure path for client-side usage (front-end should use URL::route('contracts.certification', $contractID))
+        if ($request->expectsJson()) {
+            return response()->json(['url' => route('contracts.certification', $contractID)]);
+        }
+
+        $cacheKey = "contract_certification_pdf_{$contractID}";
+        $storagePath = "public/certifications/{$contractID}_contract_certification.pdf";
+
+        if (Cache::has($cacheKey) && Storage::exists($storagePath)) {
+            return response()->file(storage_path("app/{$storagePath}"), [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => "inline; filename=\"{$contractID}_contract_certification.pdf\"",
             ]);
         }
-        ini_set('max_execution_time', 300); // Increase execution time to 5 minutes
-        ini_set('memory_limit', '2048M'); // Increase memory limit to 2GB
-        $pdf = PDF::loadView('pdf/posting_certification', $contract->toArray());
+
+        $pdf = PDF::loadView('pdf/posting_certification', [
+            'title' => $contract->title,
+            'contract_id' => $contract->contract_id,
+            'bulletin_posting' => $contract->bulletin_posting,
+            'bulletin_removal' => $contract->bulletin_removal,
+        ]);
+
+        // Dompdf options to pacify memory usage and allow remote logos.
+        $pdf->setOption('isHtml5ParserEnabled', true);
+        $pdf->setOption('isRemoteEnabled', true);
+        $pdf->setOption('dpi', 96);
+        $pdf->setOption('defaultFont', 'sans-serif');
+
         $pdf->setPaper('A4', 'portrait');
-        $pdf->setOption('margin: 50em 500em 300em 1em;');
-        return $pdf->stream($contractID."_contract_certification.pdf");
+        $pdf->setOption('margin-top', '20mm');
+        $pdf->setOption('margin-bottom', '20mm');
+        $pdf->setOption('margin-left', '15mm');
+        $pdf->setOption('margin-right', '15mm');
+
+        // Ensure output directory exists and is writable.
+        if (!Storage::exists('public/certifications')) {
+            Storage::makeDirectory('public/certifications', 0755, true);
+        }
+
+        $pdfPath = storage_path("app/{$storagePath}");
+
+        // Use save method when available; fallback to output so memory pressure is minimized in the response path.
+        if (method_exists($pdf, 'save')) {
+            $pdf->save($pdfPath);
+        } else {
+            Storage::put($storagePath, $pdf->output());
+        }
+
+        Cache::put($cacheKey, true, now()->addMinutes(30));
+
+        return response()->file($pdfPath, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "inline; filename=\"{$contractID}_contract_certification.pdf\"",
+        ]);
     }
 }

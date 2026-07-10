@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\PhotoController;
@@ -80,6 +81,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::patch('/settings', [SettingsController::class, 'update'])->name('settings.update');
     Route::delete('/settings', [SettingsController::class, 'destroy'])->name('settings.destroy');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/settings/backup', [BackupController::class, 'index'])->name('settings.backup');
+    Route::post('/settings/backup', [BackupController::class, 'store'])->name('backup.store');
+    Route::delete('/settings/backup/{backup}', [BackupController::class, 'destroy'])->name('backup.destroy');
+    Route::get('/settings/backup/{backup}/download', [BackupController::class, 'download'])->name('backup.download');
+    Route::get('/settings/backup/import', [BackupController::class, 'importForm'])->name('backup.import.form');
+    Route::post('/settings/backup/import', [BackupController::class, 'import'])->name('backup.import');
+    Route::post('/settings/backup/{backup}/restore', [BackupController::class, 'restore'])->name('backup.restore');
+    Route::get('/settings/backup/{backup}/restore-status', [BackupController::class, 'restoreStatus'])->name('backup.restore.status');
+    Route::post('/settings/backup/{backup}/cancel-restore', [BackupController::class, 'cancelRestore'])->name('backup.restore.cancel');
 });
 
 Route::get('/contracts/{contractID}/certification', [ContractController::class, 'createCertification'])

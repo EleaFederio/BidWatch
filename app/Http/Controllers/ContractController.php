@@ -15,12 +15,11 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
-
-use function PHPUnit\Framework\isEmpty;
 
 class ContractController extends Controller
 {
@@ -104,6 +103,306 @@ class ContractController extends Controller
             'success' => true,
             'message' => 'Contract Added!'
         ]);
+    }
+
+    public function importPdf(Request $request)
+    {
+        $request->validate([
+            'pdf' => 'required|file|mimes:pdf|max:10240', // Max 10MB
+        ]);
+
+        $file = $request->file('pdf');
+        $tempPath = $file->getRealPath();
+
+        try {
+            $apiKey = config('services.gemini.key');
+            if (!$apiKey) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gemini API Key is not configured. Please add GEMINI_API_KEY to your .env file.'
+                ], 500);
+            }
+            $payload = [
+                'contents' => [
+                    [
+                        'parts' => [
+                            [
+                                'text' => $this->geminiContractImportPrompt(),
+                            ],
+                            [
+                                'inline_data' => [
+                                    'mime_type' => $file->getClientMimeType() ?: $file->getMimeType() ?: 'application/pdf',
+                                    'data' => base64_encode(file_get_contents($tempPath)),
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                'generationConfig' => [
+                    'responseMimeType' => 'application/json'
+                ]
+            ];
+
+            $response = null;
+            $usedModel = null;
+
+            foreach ($this->geminiImportModels() as $model) {
+                $usedModel = $model;
+                $response = Http::timeout(120)
+                    ->connectTimeout(15)
+                    ->retry(2, 1000, null, false)
+                    ->withHeaders([
+                        'Content-Type' => 'application/json',
+                    ])
+                    ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}", $payload);
+
+                if ($response->successful() || !$this->shouldTryNextGeminiModel($response->status())) {
+                    break;
+                }
+            }
+
+            if (!$response || !$response->successful()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Gemini API call failed using {$usedModel}: " . $this->sanitizeGeminiErrorMessage($response?->body() ?? 'No response received.')
+                ], 500);
+            }
+
+            $result = $response->json();
+            $jsonText = $result['candidates'][0]['content']['parts'][0]['text'] ?? '';
+            $contractData = $this->decodeGeminiContractJson($jsonText);
+            if ($contractData === null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to parse JSON response from Gemini. Raw response: ' . trim($jsonText)
+                ], 500);
+            }
+
+            // Ensure fallbacks for required database columns
+            $contractId = trim($contractData['contract_id'] ?? '');
+            if (empty($contractId)) {
+                $contractId = 'GEN-' . strtoupper(\Illuminate\Support\Str::random(8));
+            }
+
+            // Uniqueness check for contract_id (append suffix if duplicate)
+            $originalContractId = $contractId;
+            $counter = 1;
+            while (Contract::where('contract_id', $contractId)->exists()) {
+                $contractId = $originalContractId . '-' . $counter;
+                $counter++;
+            }
+
+            $title = trim($contractData['title'] ?? '');
+            if (empty($title)) {
+                $title = 'Imported Contract (' . $contractId . ')';
+            }
+
+            $approvedBudget = $contractData['approved_budget'] ?? 0.00;
+            // Clean approved budget from commas/symbols if they survived
+            if (is_string($approvedBudget)) {
+                $approvedBudget = preg_replace('/[^\d.]/', '', $approvedBudget);
+                $approvedBudget = (float) $approvedBudget;
+            }
+
+            // Date validation/fallback
+            $openingOfBids = $contractData['opening_of_bids'] ?? null;
+            if (empty($openingOfBids)) {
+                // Since opening_of_bids is required by validation, fallback to 7 days from now if not found
+                $openingOfBids = now()->addDays(7)->format('Y-m-d H:i:s');
+            }
+
+            $preBid = $contractData['pre_bid'] ?? null;
+            if (empty($preBid)) {
+                $preBid = null;
+            }
+
+            $bulletinPosting = $contractData['bulletin_posting'] ?? null;
+            if (empty($bulletinPosting)) {
+                $bulletinPosting = now()->format('Y-m-d');
+            }
+
+            $bulletinRemoval = $contractData['bulletin_removal'] ?? null;
+            if (empty($bulletinRemoval)) {
+                $bulletinRemoval = now()->addDays(14)->format('Y-m-d');
+            }
+
+            // Store the PDF file under public disk
+            $filename = $contractId . '_' . time() . '.pdf';
+            $pdfPath = $file->storeAs('contracts/pdfs', $filename, 'public');
+
+            $statusLabel = $this->resolvePrimaryStatusLabel(null, false);
+
+            $contract = Contract::create([
+                'contract_id' => $contractId,
+                'title' => $title,
+                'description' => $contractData['description'] ?? null,
+                'location' => $contractData['location'] ?? null,
+                'approved_budget' => $approvedBudget,
+                'pre_bid' => $preBid,
+                'opening_of_bids' => $openingOfBids,
+                'bulletin_posting' => $bulletinPosting,
+                'bulletin_removal' => $bulletinRemoval,
+                'archieve' => false,
+                'status' => $statusLabel,
+                'pdf_path' => $pdfPath,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Contract imported successfully!',
+                'data' => $contract
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred during import: ' . $this->sanitizeGeminiErrorMessage($e->getMessage())
+            ], 500);
+        }
+    }
+
+    private function geminiContractImportPrompt(): string
+    {
+        return "Analyze the attached contract, invitation to bid, or bidding document PDF. " .
+            "Extract the key fields and return a JSON object ONLY matching this schema:\n" .
+            "{\n" .
+            "  \"contract_id\": \"string (Unique code/identifier e.g. 23FL0000, 2026-BAC-01, etc. If not found, generate a unique code)\",\n" .
+            "  \"title\": \"string (Title or name of the contract/project)\",\n" .
+            "  \"description\": \"string (Short summary or description details of the project, nullable)\",\n" .
+            "  \"location\": \"string (Location of the project, nullable)\",\n" .
+            "  \"approved_budget\": \"float/decimal (Approved Budget for the Contract/ABC)\",\n" .
+            "  \"pre_bid\": \"string (Pre-bid conference date & time in YYYY-MM-DD HH:mm:ss format, or null)\",\n" .
+            "  \"opening_of_bids\": \"string (Opening of bids date & time in YYYY-MM-DD HH:mm:ss format, or null)\",\n" .
+            "  \"bulletin_posting\": \"string (Bulletin posting date in YYYY-MM-DD format, or null)\",\n" .
+            "  \"bulletin_removal\": \"string (Bulletin removal date in YYYY-MM-DD format, or null)\"\n" .
+            "}\n\n" .
+            "Requirements:\n" .
+            "1. If a date is missing, return null for pre_bid or opening_of_bids.\n" .
+            "2. Try to convert dates (e.g. 'October 24, 2026 at 10:00 AM') into YYYY-MM-DD HH:mm:ss.\n" .
+            "3. approved_budget should be a clean number (e.g. 1500000.50). Remove any currency symbols or commas.\n" .
+            "4. Use the document's procurement dates as written; do not infer current dates unless a field is absent.\n" .
+            "5. Do not include markdown blocks like ```json ... ``` or any commentary. Return only the raw JSON string.";
+    }
+
+    private function geminiImportModels(): array
+    {
+        $models = array_merge(
+            [config('services.gemini.model', 'gemini-flash-latest')],
+            config('services.gemini.fallback_models', [])
+        );
+
+        return collect($models)
+            ->map(fn ($model) => $this->normalizeGeminiModel((string) $model))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    private function normalizeGeminiModel(string $model): string
+    {
+        $model = ltrim(trim($model), '/');
+
+        return Str::startsWith($model, 'models/')
+            ? Str::after($model, 'models/')
+            : $model;
+    }
+
+    private function shouldTryNextGeminiModel(int $status): bool
+    {
+        return in_array($status, [404, 429, 500, 502, 503, 504], true);
+    }
+
+    private function decodeGeminiContractJson(string $jsonText): ?array
+    {
+        $jsonText = trim($jsonText);
+
+        // Strip out markdown code blocks if Gemini ignored the instruction.
+        if (str_starts_with($jsonText, '```')) {
+            $jsonText = preg_replace('/^```(?:json)?\s*/i', '', $jsonText);
+            $jsonText = preg_replace('/\s*```$/', '', $jsonText);
+            $jsonText = trim($jsonText);
+        }
+
+        $contractData = json_decode($jsonText, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($contractData)) {
+            return $contractData;
+        }
+
+        $jsonText = $this->extractFirstJsonObject($jsonText);
+        if ($jsonText === null) {
+            return null;
+        }
+
+        $contractData = json_decode($jsonText, true);
+
+        return json_last_error() === JSON_ERROR_NONE && is_array($contractData)
+            ? $contractData
+            : null;
+    }
+
+    private function extractFirstJsonObject(string $text): ?string
+    {
+        $start = strpos($text, '{');
+        if ($start === false) {
+            return null;
+        }
+
+        $depth = 0;
+        $inString = false;
+        $escaped = false;
+        $length = strlen($text);
+
+        for ($index = $start; $index < $length; $index++) {
+            $char = $text[$index];
+
+            if ($inString) {
+                if ($escaped) {
+                    $escaped = false;
+                    continue;
+                }
+
+                if ($char === '\\') {
+                    $escaped = true;
+                    continue;
+                }
+
+                if ($char === '"') {
+                    $inString = false;
+                }
+
+                continue;
+            }
+
+            if ($char === '"') {
+                $inString = true;
+                continue;
+            }
+
+            if ($char === '{') {
+                $depth++;
+                continue;
+            }
+
+            if ($char === '}') {
+                $depth--;
+
+                if ($depth === 0) {
+                    return substr($text, $start, $index - $start + 1);
+                }
+            }
+        }
+
+        if ($depth > 0 && !$inString) {
+            return substr($text, $start) . str_repeat('}', $depth);
+        }
+
+        return null;
+    }
+
+    private function sanitizeGeminiErrorMessage(string $message): string
+    {
+        return preg_replace('/([?&]key=)[^&\s)]+/i', '$1[redacted]', $message);
     }
 
     /**

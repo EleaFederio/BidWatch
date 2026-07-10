@@ -75,6 +75,66 @@ export default function Dashboard({ auth }) {
     ];
 
     const [modalDisplay, setModalDisplay] = useState(false);
+    const [importMode, setImportMode] = useState(null);
+    const [pdfFile, setPdfFile] = useState(null);
+    const [isImporting, setIsImporting] = useState(false);
+    const [importError, setImportError] = useState(null);
+    const [importedContract, setImportedContract] = useState(null);
+
+    const handlePdfChange = (e) => {
+        const file = e.target.files[0];
+        if (file && file.type === 'application/pdf') {
+            setPdfFile(file);
+            setImportError(null);
+            setImportedContract(null);
+        } else {
+            setImportError('Please select a valid PDF file.');
+        }
+    };
+
+    const handleImportPdf = () => {
+        if (!pdfFile) {
+            setImportError('Please select a PDF file first.');
+            return;
+        }
+
+        setIsImporting(true);
+        setImportError(null);
+        setImportedContract(null);
+
+        const formData = new FormData();
+        formData.append('pdf', pdfFile);
+
+        axios.post('/api/contracts/import-pdf', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+        .then(res => {
+            setIsImporting(false);
+            if (res.data.success) {
+                setImportedContract(res.data.data);
+                getContracts();
+            } else {
+                setImportError(res.data.message || 'Failed to import contract.');
+            }
+        })
+        .catch(err => {
+            setIsImporting(false);
+            const msg = err.response?.data?.message || 'An error occurred during upload.';
+            setImportError(msg);
+        });
+    };
+
+    const handleCloseModal = () => {
+        setModalDisplay(false);
+        setImportMode(null);
+        setPdfFile(null);
+        setImportError(null);
+        setImportedContract(null);
+        setIsImporting(false);
+        setPage(0);
+    };
 
     const getContracts = () => {
         axios.get(apiUrl)
@@ -431,7 +491,7 @@ export default function Dashboard({ auth }) {
 
             <button
                 type="button"
-                onClick={() => setModalDisplay(true)}
+                onClick={() => { setModalDisplay(true); setImportMode(null); setPdfFile(null); setImportError(null); setImportedContract(null); }}
                 aria-label="Add Contract"
                 className="fixed bottom-6 right-6 z-20 inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-900 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(15,23,42,0.24)] transition hover:-translate-y-1 hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-300"
             >
@@ -441,25 +501,262 @@ export default function Dashboard({ auth }) {
             </button>
 
             <Modal show={modalDisplay}>
-            <div className="relative rounded-lg bg-white shadow dark:bg-gray-700">
-                <button type="button" onClick={() => setModalDisplay(false)} className="absolute right-2.5 top-3 ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white" data-modal-hide="authentication-modal">
-                    <svg aria-hidden="true" className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
-                    <span className="sr-only">Close modal</span>
-                </button>
-                <div className="px-6 py-6 lg:px-8">
-                    <Stepper page={page} formTitles={formTitles} />
-                    <div>
-                        {pageDisplay()}
+                <div className="relative rounded-2xl bg-white shadow-xl border border-slate-100 overflow-hidden">
+                    <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+                        <div className="flex items-center gap-2">
+                            {importMode !== null && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setImportMode(null);
+                                        setPdfFile(null);
+                                        setImportError(null);
+                                        setImportedContract(null);
+                                    }}
+                                    className="mr-2 inline-flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                                    </svg>
+                                    Back
+                                </button>
+                            )}
+                            <h3 className="text-base font-bold text-slate-900">
+                                {importMode === 'manual' ? 'Add Contract Manually' : importMode === 'ai' ? 'Import PDF with Gemini' : 'Create New Contract'}
+                            </h3>
+                        </div>
+                        <button type="button" onClick={handleCloseModal} className="inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-slate-400 hover:bg-slate-100 hover:text-slate-900 transition">
+                            <svg aria-hidden="true" className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
+                            <span className="sr-only">Close modal</span>
+                        </button>
                     </div>
-                    <StepperControl
-                        page={page}
-                        formTitles={formTitles}
-                        setPage={setPage}
-                        setModalDisplay={setModalDisplay}
-                        addContract={addContract}
-                    />
+
+                    <div className="px-6 py-6">
+                        {importMode === null && (
+                            <div className="space-y-6">
+                                <p className="text-sm text-slate-500 text-center">
+                                    Choose how you want to add a contract to BidWatch.
+                                </p>
+                                <div className="grid gap-4 sm:grid-cols-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setImportMode('manual')}
+                                        className="group relative flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm transition hover:border-slate-400 hover:shadow-md focus:outline-none"
+                                    >
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 text-slate-600 group-hover:bg-slate-900 group-hover:text-white transition-colors duration-300">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                            </svg>
+                                        </div>
+                                        <h4 className="mt-4 text-sm font-semibold text-slate-950">Manual Setup</h4>
+                                        <p className="mt-1 text-xs text-slate-500">
+                                            Manually enter contract metadata, dates, and schedules.
+                                        </p>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setImportMode('ai')}
+                                        className="group relative flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm transition hover:border-slate-400 hover:shadow-md focus:outline-none"
+                                    >
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-50 text-sky-600 group-hover:bg-sky-600 group-hover:text-white transition-colors duration-300">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l8.982-11.761a2.67 2.67 0 00-2.316-4.32H14.18L15 3L6.018 14.761a2.67 2.67 0 002.316 4.32H9.813z" />
+                                            </svg>
+                                        </div>
+                                        <h4 className="mt-4 text-sm font-semibold text-slate-950">Gemini PDF Import</h4>
+                                        <p className="mt-1 text-xs text-slate-500">
+                                            Upload a bidding PDF. Gemini automatically registers the details.
+                                        </p>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {importMode === 'manual' && (
+                            <div>
+                                <Stepper page={page} formTitles={formTitles} />
+                                <div className="mt-4">
+                                    {pageDisplay()}
+                                </div>
+                                <StepperControl
+                                    page={page}
+                                    formTitles={formTitles}
+                                    setPage={setPage}
+                                    setModalDisplay={setModalDisplay}
+                                    addContract={addContract}
+                                />
+                            </div>
+                        )}
+
+                        {importMode === 'ai' && (
+                            <div className="space-y-6">
+                                {!importedContract && !isImporting && (
+                                    <div className="flex flex-col items-center justify-center">
+                                        <label
+                                            htmlFor="pdf-upload"
+                                            className="flex w-full cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 py-10 hover:bg-slate-100 transition duration-300"
+                                        >
+                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <svg className="mb-3 h-10 w-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                                </svg>
+                                                <p className="mb-2 text-sm text-slate-700">
+                                                    <span className="font-semibold">Click to upload</span> or drag and drop
+                                                </p>
+                                                <p className="text-xs text-slate-500">PDF Document (Max 10MB)</p>
+                                            </div>
+                                            <input
+                                                id="pdf-upload"
+                                                type="file"
+                                                accept=".pdf"
+                                                className="hidden"
+                                                onChange={handlePdfChange}
+                                            />
+                                        </label>
+
+                                        {pdfFile && (
+                                            <div className="mt-4 w-full rounded-xl bg-slate-100 p-3 flex items-center justify-between border border-slate-200">
+                                                <div className="flex items-center gap-2">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 text-rose-500">
+                                                        <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V11.25A8.25 8.25 0 0011.25 3H5.625z" />
+                                                        <path d="M12.75 3v5.25c0 .621.504 1.125 1.125 1.125h5.25A8.287 8.287 0 0012.75 3z" />
+                                                    </svg>
+                                                    <div className="max-w-[200px] sm:max-w-[300px]">
+                                                        <p className="text-xs font-semibold text-slate-900 truncate">{pdfFile.name}</p>
+                                                        <p className="text-[10px] text-slate-500">{(pdfFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setPdfFile(null)}
+                                                    className="text-xs font-medium text-rose-600 hover:text-rose-800 transition"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {pdfFile && (
+                                            <button
+                                                type="button"
+                                                onClick={handleImportPdf}
+                                                className="mt-6 w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 shadow-sm"
+                                            >
+                                                Process with Gemini
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+
+                                {isImporting && (
+                                    <div className="flex flex-col items-center justify-center py-10 space-y-4">
+                                        <div className="relative flex items-center justify-center">
+                                            <div className="h-16 w-16 animate-spin rounded-full border-4 border-slate-200 border-t-sky-600"></div>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="absolute w-6 h-6 text-sky-600 animate-pulse">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 21l8.982-11.761a2.67 2.67 0 00-2.316-4.32H14.18L15 3L6.018 14.761a2.67 2.67 0 002.316 4.32H9.813z" />
+                                            </svg>
+                                        </div>
+                                        <div className="text-center space-y-1">
+                                            <p className="text-sm font-semibold text-slate-900">Gemini is analyzing PDF...</p>
+                                            <p className="text-xs text-slate-500 max-w-[280px]">
+                                                Extracting contract titles, approved budgets, dates, and schedules. This may take a moment.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {importError && (
+                                    <div className="rounded-xl bg-rose-50 border border-rose-200 p-4 text-rose-700 text-xs">
+                                        <div className="flex gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 flex-shrink-0">
+                                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                                            </svg>
+                                            <div>
+                                                <span className="font-semibold">Import Error:</span> {importError}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {importedContract && (
+                                    <div className="space-y-6">
+                                        <div className="rounded-2xl bg-emerald-50 border border-emerald-100 p-5 text-emerald-900 text-center">
+                                            <div className="inline-flex items-center justify-center rounded-full bg-emerald-100 p-2 text-emerald-600 mb-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-6 h-6">
+                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <h4 className="text-sm font-bold">Successfully Imported!</h4>
+                                            <p className="text-xs text-emerald-700 mt-1">
+                                                The contract details have been extracted and registered in the database.
+                                            </p>
+                                        </div>
+
+                                        <div className="border border-slate-100 rounded-2xl overflow-hidden bg-slate-50/50">
+                                            <div className="border-b border-slate-100 bg-slate-50 px-4 py-3">
+                                                <h5 className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Contract Summary</h5>
+                                            </div>
+                                            <div className="p-4 space-y-3 text-xs text-slate-700 divide-y divide-slate-100">
+                                                <div className="flex justify-between py-1">
+                                                    <span className="font-medium text-slate-500">Contract ID</span>
+                                                    <span className="font-semibold text-slate-900">{importedContract.contract_id}</span>
+                                                </div>
+                                                <div className="flex flex-col py-1.5">
+                                                    <span className="font-medium text-slate-500 mb-0.5">Title</span>
+                                                    <span className="font-semibold text-slate-900">{importedContract.title}</span>
+                                                </div>
+                                                <div className="flex justify-between py-1">
+                                                    <span className="font-medium text-slate-500">Approved Budget</span>
+                                                    <span className="font-semibold text-slate-900">
+                                                        ₱{parseFloat(importedContract.approved_budget).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between py-1">
+                                                    <span className="font-medium text-slate-500">Location</span>
+                                                    <span className="font-semibold text-slate-900">{importedContract.location || 'N/A'}</span>
+                                                </div>
+                                                <div className="flex justify-between py-1">
+                                                    <span className="font-medium text-slate-500">Opening of Bids</span>
+                                                    <span className="font-semibold text-slate-900">
+                                                        {importedContract.opening_of_bids ? moment(importedContract.opening_of_bids).format('MMMM DD, YYYY @ hh:mm a') : 'N/A'}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between py-1">
+                                                    <span className="font-medium text-slate-500">Pre-Bid</span>
+                                                    <span className="font-semibold text-slate-900">
+                                                        {importedContract.pre_bid ? moment(importedContract.pre_bid).format('MMMM DD, YYYY @ hh:mm a') : 'N/A'}
+                                                    </span>
+                                                </div>
+                                                {importedContract.pdf_path && (
+                                                    <div className="flex justify-between py-1">
+                                                        <span className="font-medium text-slate-500">Uploaded PDF</span>
+                                                        <a
+                                                            href={`/storage/${importedContract.pdf_path.replace('public/', '')}`}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="font-semibold text-sky-600 hover:text-sky-800 underline"
+                                                        >
+                                                            View Document
+                                                        </a>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            onClick={handleCloseModal}
+                                            className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                                        >
+                                            Done
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
             </Modal>
 
 

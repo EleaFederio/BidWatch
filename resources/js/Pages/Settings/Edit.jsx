@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import UpdateSignatoryForm from './Partials/UpdateSignatoryForm';
 import OfficersListForm from './Partials/OfficersListForm';
 import ProjectStatusManager from './Partials/ProjectStatusManager';
@@ -51,7 +51,7 @@ export default function Edit({ auth, mustVerifyEmail, status, projectStatuses = 
                                 </div>
                                 <div className="flex items-baseline justify-between gap-3">
                                     <span className="text-sm text-slate-300">Settings sections</span>
-                                    <span className="text-3xl font-semibold text-white">3</span>
+                                    <span className="text-3xl font-semibold text-white">4</span>
                                 </div>
                                 <div className="rounded-2xl bg-white/10 px-4 py-3 text-sm text-slate-200">
                                     Project statuses are ready to be reviewed here before they are used across contracts.
@@ -87,6 +87,21 @@ export default function Edit({ auth, mustVerifyEmail, status, projectStatuses = 
                             >
                                 <ProjectStatusManager initialStatuses={projectStatuses} />
                             </SettingsCard>
+
+                            <Link href={route('settings.backup')} className="block">
+                                <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.08)] hover:shadow-[0_18px_50px_rgba(15,23,42,0.12)] transition-shadow cursor-pointer">
+                                    <div className="border-b border-slate-200 bg-slate-50/80 px-6 py-5 sm:px-8">
+                                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">Data Management</p>
+                                        <h3 className="mt-2 text-xl font-semibold text-slate-900">Create and manage backups</h3>
+                                        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Backup your data with flexible date range options to protect your project information.</p>
+                                    </div>
+                                    <div className="px-6 py-6 sm:px-8">
+                                        <button type="button" className="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                            Go to Backups →
+                                        </button>
+                                    </div>
+                                </section>
+                            </Link>
 
                             <section className="rounded-[28px] border border-cyan-200 bg-cyan-50 p-6 shadow-[0_18px_50px_rgba(8,145,178,0.10)]">
                                 <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-700">Best Practice</p>

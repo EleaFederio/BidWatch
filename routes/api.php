@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
+Route::post('/contracts/import-pdf', [ContractController::class, 'importPdf']);
 Route::apiResource('/contracts', ContractController::class);
 Route::get('/contract_schedule/bidding', [ContractController::class, 'bacSchedule']);
 Route::get('/contract_schedule/month', [ContractController::class, 'threeMonthRecord']);

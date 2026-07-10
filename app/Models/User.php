@@ -65,4 +65,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(KanbanCard::class, 'created_by');
     }
+
+    public function backups(): HasMany
+    {
+        return $this->hasMany(Backup::class);
+    }
 }

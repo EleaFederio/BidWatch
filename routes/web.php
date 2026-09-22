@@ -99,4 +99,9 @@ Route::get('/contracts/{contractID}/certification', [ContractController::class, 
     ->middleware(['auth', 'verified'])
     ->name('contracts.certification');
 
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/api/chat-gemini', [App\Http\Controllers\GeminiChatController::class, 'chat'])->name('chat.gemini');
+});
+
 require __DIR__.'/auth.php';
+

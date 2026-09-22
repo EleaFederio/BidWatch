@@ -5,7 +5,7 @@ import axios from "axios";
 import ReactDatePicker from "react-datepicker";
 import moment from "moment/moment";
 
-const AnnouncementModal = ({showModal, setShowModal}) => {
+const AnnouncementModal = ({showModal, setShowModal, onCreated}) => {
     const [announcement, setAnnouncement] = useState({
         title: '',
         message: '',
@@ -19,6 +19,27 @@ const AnnouncementModal = ({showModal, setShowModal}) => {
           [evt.target.name]: value
         });
       }
+
+    const submitCreateAnnouncement = async () => {
+        try {
+            const response = await axios.post(route('announcements.store'), {
+                title: announcement.title,
+                message: announcement.message,
+                schedule: moment(announcement.date).format('YYYY-MM-DD HH:mm:ss'),
+            });
+
+            setAnnouncement({
+                title: '',
+                message: '',
+                date: new Date(),
+            });
+            onCreated?.(response.data.announcement);
+            setShowModal(false);
+        } catch (error) {
+            // Laravel returns field-level validation errors in the response.
+            console.error('Unable to create announcement.', error);
+        }
+    };
 
     useEffect(() => {}, []);
 
@@ -67,7 +88,7 @@ const AnnouncementModal = ({showModal, setShowModal}) => {
 
             <Modal.Footer>
                 <Button variant="danger" size="sm" onClick={() => setShowModal(false)}>Close</Button>
-                <Button variant="primary" size="sm" onClick={() => submitCreateAnnouncement()}>Create</Button>
+                <Button variant="primary" size="sm" onClick={submitCreateAnnouncement}>Create</Button>
             </Modal.Footer>
         </Modal>
     )

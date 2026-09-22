@@ -1,13 +1,58 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import TextToSpeech from '@/lib/TextToSpeech';
 import AnnouncementModal from '@/lib/time_left/AnnouncementModal';
+import { getRemainingTimeUntilMSTimeStamp } from '@/lib/time_left/getRemainingTimeUntilMSTimeStamp';
 import { Head } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import axios from 'axios';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Card, Col, Container, FormControl, FormGroup, FormLabel, Row } from 'react-bootstrap';
 
-const Announcer = ({ auth }) => {
+const Announcer = ({ auth, announcements: initialAnnouncements = [] }) => {
     const [text, setText] = useState('');
     const [showModal, setShowModal] = useState(false);
+    const [announcements, setAnnouncements] = useState(initialAnnouncements);
+    const [currentTime, setCurrentTime] = useState(Date.now());
+    const textToSpeechRef = useRef(null);
+    const spokenAnnouncementIds = useRef(new Set());
+
+    useEffect(() => {
+        const intervalId = window.setInterval(() => setCurrentTime(Date.now()), 1000);
+
+        return () => window.clearInterval(intervalId);
+    }, []);
+
+    useEffect(() => {
+        const timers = announcements.map((announcement) => {
+            const delay = new Date(announcement.schedule).getTime() - currentTime;
+
+            if (delay <= 0 || spokenAnnouncementIds.current.has(announcement.id)) {
+                return null;
+            }
+
+            return window.setTimeout(() => {
+                if (spokenAnnouncementIds.current.has(announcement.id)) {
+                    return;
+                }
+
+                spokenAnnouncementIds.current.add(announcement.id);
+                textToSpeechRef.current?.speak(announcement.message, async () => {
+                    try {
+                        await axios.patch(route('announcements.archive', announcement.id));
+                        setAnnouncements((current) => current.filter((item) => item.id !== announcement.id));
+                    } catch (error) {
+                        console.error('Unable to archive announcement.', error);
+                    }
+                });
+            }, delay);
+        }).filter(Boolean);
+
+        return () => timers.forEach((timerId) => window.clearTimeout(timerId));
+    }, [announcements, currentTime]);
+
+    const addScheduledAnnouncement = (createdAnnouncement) => {
+        setAnnouncements((current) => [...current, createdAnnouncement]
+            .sort((first, second) => new Date(first.schedule) - new Date(second.schedule)));
+    };
 
     const announcementStats = useMemo(() => {
         const trimmed = text.trim();
@@ -91,7 +136,7 @@ const Announcer = ({ auth }) => {
                                         </FormGroup>
                                     </Card.Body>
                                     <Card.Footer className="border-top border-[#cacaca]/60 bg-white px-4 py-4 p-sm-5">
-                                        <TextToSpeech text={text} />
+                                        <TextToSpeech ref={textToSpeechRef} text={text} />
                                     </Card.Footer>
                                 </Card>
                             </Col>
@@ -117,17 +162,50 @@ const Announcer = ({ auth }) => {
                                         </div>
 
                                         <div className="flex-1 rounded-[22px] border border-dashed border-[#909090] bg-[#f6f6f4] p-4">
-                                            <div className="flex h-100 flex-column items-center justify-center rounded-[18px] bg-white px-4 py-5 text-center shadow-sm">
-                                                <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#ff8e00]/15 text-[#fd7702]">
-                                                    <svg viewBox="0 0 20 20" className="h-6 w-6 fill-current" aria-hidden="true">
-                                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2 2a1 1 0 001.414-1.414L11 9.586V6z" clipRule="evenodd" />
-                                                    </svg>
+                                            {announcements.length > 0 ? (
+                                                <div className="flex flex-column gap-3">
+                                                    {announcements.map((announcement) => {
+                                                        const remaining = getRemainingTimeUntilMSTimeStamp(announcement.schedule);
+
+                                                        return (
+                                                            <article key={announcement.id} className="rounded-[18px] bg-white p-4 shadow-sm">
+                                                                <div className="flex items-start justify-between gap-3">
+                                                                    <div className="min-w-0">
+                                                                        <h4 className="mb-1 truncate text-base font-semibold text-[#002347]">{announcement.title}</h4>
+                                                                    </div>
+                                                                    <span className="shrink-0 rounded-full bg-[#ff8e00]/15 px-3 py-1 text-xs font-semibold text-[#c95400]">
+                                                                        {remaining.days}d {remaining.hours}h {remaining.minutes}m {remaining.seconds}s
+                                                                    </span>
+                                                                </div>
+                                                                <details className="group mt-3">
+                                                                    <summary className="cursor-pointer list-none text-sm font-semibold text-[#003f7d] marker:hidden">
+                                                                        <span className="group-open:hidden">View message</span>
+                                                                        <span className="hidden group-open:inline">Hide message</span>
+                                                                    </summary>
+                                                                    <p className="mb-0 pt-2 text-sm leading-6 text-[#575757]">
+                                                                        {announcement.message}
+                                                                    </p>
+                                                                </details>
+                                                                <p className="mb-0 mt-3 text-xs font-medium text-[#575757]">
+                                                                    Scheduled for {new Date(announcement.schedule).toLocaleString()}
+                                                                </p>
+                                                            </article>
+                                                        );
+                                                    })}
                                                 </div>
-                                                <h4 className="text-lg font-semibold text-[#002347]">No scheduled announcements yet</h4>
-                                                <p className="mt-2 max-w-sm text-sm leading-6 text-[#575757]">
-                                                    Use the schedule button to create time-based announcement entries for events, reminders, or public notices.
-                                                </p>
-                                            </div>
+                                            ) : (
+                                                <div className="flex h-100 flex-column items-center justify-center rounded-[18px] bg-white px-4 py-5 text-center shadow-sm">
+                                                    <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#ff8e00]/15 text-[#fd7702]">
+                                                        <svg viewBox="0 0 20 20" className="h-6 w-6 fill-current" aria-hidden="true">
+                                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2 2a1 1 0 001.414-1.414L11 9.586V6z" clipRule="evenodd" />
+                                                        </svg>
+                                                    </div>
+                                                    <h4 className="text-lg font-semibold text-[#002347]">No scheduled announcements yet</h4>
+                                                    <p className="mt-2 max-w-sm text-sm leading-6 text-[#575757]">
+                                                        Use the schedule button to create time-based announcement entries for events, reminders, or public notices.
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
                                     </Card.Body>
                                 </Card>
@@ -137,7 +215,11 @@ const Announcer = ({ auth }) => {
                 </div>
             </Container>
 
-            <AnnouncementModal showModal={showModal} setShowModal={setShowModal} />
+            <AnnouncementModal
+                showModal={showModal}
+                setShowModal={setShowModal}
+                onCreated={addScheduledAnnouncement}
+            />
         </AuthenticatedLayout>
     );
 };

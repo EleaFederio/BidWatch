@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
 import { Button, Col, FormSelect } from "react-bootstrap";
 import introTrack from '../../sounds/announcement_sounds/Intro.wav';
 import outroTrack from '../../sounds/announcement_sounds/Outro.wav';
@@ -12,7 +12,7 @@ const pickDefaultVoice = (voices) => (
   null
 );
 
-const TextToSpeech = ({ text }) => {
+const TextToSpeech = forwardRef(({ text }, ref) => {
   const [isPaused, setIsPaused] = useState(false);
   const [utterance, setUtterance] = useState(null);
   const [voice, setVoice] = useState(null);
@@ -47,6 +47,33 @@ const TextToSpeech = ({ text }) => {
     };
   }, [text, voice]);
 
+  const speak = (message, onComplete) => {
+    const synth = window.speechSynthesis;
+    const speechUtterance = new SpeechSynthesisUtterance(message);
+
+    speechUtterance.voice = voice;
+    speechUtterance.onend = () => {
+      outro.currentTime = 0;
+      outro.play().catch(() => {});
+      onComplete?.();
+    };
+
+    synth.cancel();
+    intro.currentTime = 0;
+    intro.volume = 0.3;
+    outro.volume = 0.3;
+
+    intro.play()
+      .then(() => {
+        synth.speak(speechUtterance);
+      })
+      .catch(() => {
+        synth.speak(speechUtterance);
+      });
+  };
+
+  useImperativeHandle(ref, () => ({ speak }), [voice]);
+
   const handlePlay = () => {
     const synth = window.speechSynthesis;
 
@@ -58,15 +85,17 @@ const TextToSpeech = ({ text }) => {
       synth.resume();
     } else {
       utterance.voice = voice;
+      intro.currentTime = 0;
       intro.volume = 0.3;
       outro.volume = 0.3;
-      intro.play();
       utterance.onend = () => {
-        outro.play();
+        outro.currentTime = 0;
+        outro.play().catch(() => {});
       };
       intro.onended = () => {
         synth.speak(utterance);
       };
+      intro.play().catch(() => {});
     }
 
     setIsPaused(false);
@@ -104,6 +133,6 @@ const TextToSpeech = ({ text }) => {
       </Col>
     </div>
   );
-};
+});
 
 export default TextToSpeech;

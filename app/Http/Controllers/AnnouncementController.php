@@ -28,7 +28,27 @@ class AnnouncementController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'message' => ['required', 'string'],
+            'schedule' => ['required', 'date_format:Y-m-d H:i:s'],
+        ]);
+
+        $announcement = Announcement::create($validated);
+
+        return response()->json([
+            'announcement' => $announcement,
+            'message' => 'Announcement scheduled successfully.',
+        ], 201);
+    }
+
+    public function archive(Announcement $announcement)
+    {
+        $announcement->update(['archive' => true]);
+
+        return response()->json([
+            'announcement' => $announcement->fresh(),
+        ]);
     }
 
     /**

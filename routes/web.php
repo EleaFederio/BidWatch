@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\BackupController;
+use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\PhotoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
+use App\Models\Announcement;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -50,8 +52,19 @@ Route::get('/map', function () {
     return Inertia::render('Map');
 })->middleware(['auth', 'verified'])->name('map');
 Route::get('/announcer', function () {
-    return Inertia::render('Announcer');
+    return Inertia::render('Announcer', [
+        'announcements' => Announcement::query()
+            ->where('archive', false)
+            ->orderBy('schedule')
+            ->get(),
+    ]);
 })->middleware(['auth', 'verified'])->name('announcer');
+Route::post('/announcements', [AnnouncementController::class, 'store'])
+    ->middleware(['auth', 'verified'])
+    ->name('announcements.store');
+Route::patch('/announcements/{announcement}/archive', [AnnouncementController::class, 'archive'])
+    ->middleware(['auth', 'verified'])
+    ->name('announcements.archive');
 Route::get('/contracts/{contractID}', [ContractController::class, 'details'])
     ->middleware(['auth', 'verified'])
     ->name('contracts.details');
@@ -104,4 +117,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
-

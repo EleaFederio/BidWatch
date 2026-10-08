@@ -23,20 +23,28 @@ const Announcer = ({ auth, announcements: initialAnnouncements = [] }) => {
 
     useEffect(() => {
         const timers = announcements.map((announcement) => {
+            // Calculate how long until this scheduled announcement should be spoken.
             const delay = new Date(announcement.schedule).getTime() - currentTime;
 
+            // Skip if the scheduled time has already passed or it was already spoken.
             if (delay <= 0 || spokenAnnouncementIds.current.has(announcement.id)) {
                 return null;
             }
 
+            // Trigger the announcement when the timer reaches the scheduled time.
             return window.setTimeout(() => {
+                // Guard against duplicate speech if the same announcement is processed again.
                 if (spokenAnnouncementIds.current.has(announcement.id)) {
                     return;
                 }
 
+                // Mark as spoken before triggering audio so it is not replayed.
                 spokenAnnouncementIds.current.add(announcement.id);
+
+                // This is the actual trigger that speaks the scheduled announcement message.
                 textToSpeechRef.current?.speak(announcement.message, async () => {
                     try {
+                        // Archive the announcement after speaking finishes.
                         await axios.patch(route('announcements.archive', announcement.id));
                         setAnnouncements((current) => current.filter((item) => item.id !== announcement.id));
                     } catch (error) {
